@@ -195,7 +195,10 @@ export default function HomePage() {
       <ShareRow text={post} link={link} />
       <div className="sep" />
       <p>
-        Your private results page (bookmark this — it's the only way back in):
+        Your private results page
+        {email.trim()
+          ? " (bookmark it, or use the email you gave to recover it later):"
+          : " (bookmark this — it's the only way back in):"}
       </p>
       <input readOnly value={resultsLink} onFocus={(e) => e.target.select()} />
       <a className="btn alt" href={resultsLink}>
