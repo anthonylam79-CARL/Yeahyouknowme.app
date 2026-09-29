@@ -13,6 +13,7 @@ export default function HomePage() {
   const [category, setCategory] = useState('Mix it up');
   const [length, setLength] = useState('Standard');
   const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [questionIds, setQuestionIds] = useState([]);
   const [answers, setAnswers] = useState([]);
   const [i, setI] = useState(0);
@@ -60,6 +61,7 @@ export default function HomePage() {
           audience,
           questionIds,
           answers: finalAnswers,
+          email: email.trim() || null,
         }),
       });
       const data = await res.json();
@@ -129,6 +131,13 @@ export default function HomePage() {
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
+        <input
+          type="email"
+          placeholder="Email (optional, so you can recover your results link later)"
+          maxLength={200}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
         <button className="btn" onClick={start}>
           Make my quiz
         </button>
@@ -192,6 +201,12 @@ export default function HomePage() {
       <a className="btn alt" href={resultsLink}>
         See my results
       </a>
+      {!email.trim() && (
+        <p className="note">
+          You didn't give an email, so if you lose this link there's no way to get it back —
+          bookmark it now.
+        </p>
+      )}
     </>
   );
 }

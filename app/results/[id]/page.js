@@ -35,6 +35,9 @@ export default function ResultsPage() {
           This link is either missing its access token or it's wrong. Use the exact results link
           you got when you made the quiz.
         </p>
+        <a className="btn alt" href="/recover">
+          Lost your link?
+        </a>
       </>
     );
   }
