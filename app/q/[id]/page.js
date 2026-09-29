@@ -31,7 +31,7 @@ export default function PlayPage() {
   }, [id]);
 
   async function pick(optionIndex) {
-    if (picked !== null) return; // already answered this one, waiting on Next
+    // Selecting again before hitting Next just changes the pick.
     setPicked(optionIndex);
     const next = [...guesses];
     next[i] = optionIndex;
@@ -119,10 +119,7 @@ export default function PlayPage() {
         {q.options.map((opt, k) => (
           <button
             key={k}
-            className={
-              'opt' + (picked !== null && picked === k ? ' bad' : '')
-            }
-            disabled={picked !== null}
+            className={'opt' + (picked === k ? ' ok' : '')}
             onClick={() => pick(k)}
           >
             {opt}
