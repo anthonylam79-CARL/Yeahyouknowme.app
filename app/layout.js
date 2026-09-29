@@ -1,6 +1,7 @@
 import './globals.css';
 
 export const metadata = {
+  metadataBase: new URL(process.env.SITE_URL || 'https://yeahyouknowme.app'),
   title: 'Yeah You Know Me',
   description: 'How well do they really know you? Make a quiz, send the link, find out.',
   openGraph: {
