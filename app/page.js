@@ -141,6 +141,9 @@ export default function HomePage() {
         <button className="btn" onClick={start}>
           Make my quiz
         </button>
+        <p className="note">
+          Already made a quiz and lost the link? <a href="/recover">Recover it here</a>.
+        </p>
       </>
     );
   }
