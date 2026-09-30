@@ -47,7 +47,9 @@ create table if not exists attempts (
   quiz_id text not null references quizzes(id) on delete cascade,
   guesser_name text not null,
   guesses integer[] not null,                    -- guesser's picks, same length as quiz.question_ids
-  score integer not null,                         -- computed server-side at insert time
+  score numeric(6,2) not null,                     -- computed server-side at insert time; fractional
+                                                    -- when the quiz includes a "rate me" scale question
+                                                    -- (partial credit for closeness, not just exact hits)
   hits boolean[] not null,                        -- per-question correct/incorrect, computed server-side
   age_bracket text check (age_bracket in ('13-17','18-24','25-34','35-44','45+')),
   gender text check (gender in ('Woman','Man','Nonbinary','Prefer not to say')),

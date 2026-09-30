@@ -1,6 +1,25 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { validateAttempt } from '@/lib/validate';
+import { QUESTIONS } from '@/lib/questions';
+
+// A "hit" (used for the maker's per-question percent-correct insight) is an
+// exact match on multiple choice, or landing within 1 point on a scale
+// question — full exactness on a 1-5 self-rating is a much higher bar than
+// on a 4-option trivia question, so the threshold is looser there.
+const HIT_THRESHOLD = 0.75;
+
+// Per-question credit toward the total score. Multiple choice is still
+// strictly right/wrong. A scale question instead gives partial credit for
+// how close the guess was, so the final score reflects real closeness
+// rather than only exact hits.
+function creditFor(question, guess, answer) {
+  if (!question || question.type !== 'scale') {
+    return guess === answer ? 1 : 0;
+  }
+  const span = question.max - question.min; // 4, for a 0-4 (1-5 displayed) scale
+  return 1 - Math.abs(guess - answer) / span;
+}
 
 // POST /api/quizzes/:id/attempts — a guesser submits their guesses. Scoring
 // happens here, server-side, against the maker's real stored answers. The
@@ -32,13 +51,18 @@ export async function POST(request, { params }) {
     return NextResponse.json({ error: 'Quiz not found' }, { status: 404 });
   }
 
-  const { errors, value } = validateAttempt(body, quiz.question_ids.length);
+  const { errors, value } = validateAttempt(body, quiz.question_ids);
   if (errors.length) {
     return NextResponse.json({ error: errors.join('; ') }, { status: 400 });
   }
 
-  const hits = value.guesses.map((g, i) => g === quiz.answers[i]);
-  const score = hits.filter(Boolean).length;
+  const credits = value.guesses.map((g, i) =>
+    creditFor(QUESTIONS[quiz.question_ids[i]], g, quiz.answers[i])
+  );
+  const hits = credits.map((c) => c >= HIT_THRESHOLD);
+  // Round to 2 decimals so floating-point division (e.g. 1/4 repeated a few
+  // times) never stores something like 7.499999999999999.
+  const score = Math.round(credits.reduce((sum, c) => sum + c, 0) * 100) / 100;
 
   const { data: inserted, error: insertError } = await db
     .from('attempts')

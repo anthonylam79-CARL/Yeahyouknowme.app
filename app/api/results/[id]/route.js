@@ -46,7 +46,7 @@ export async function GET(request, { params }) {
 
   const { data: attempts, error: attemptsError } = await db
     .from('attempts')
-    .select('id, guesser_name, score, hits, age_bracket, gender, created_at')
+    .select('id, guesser_name, score, hits, guesses, age_bracket, gender, created_at')
     .eq('quiz_id', id)
     .order('score', { ascending: false })
     .order('created_at', { ascending: true });
@@ -83,7 +83,21 @@ export async function GET(request, { params }) {
     const describe = (i) => {
       const q = QUESTIONS[quiz.question_ids[i]];
       const pct = Math.round(rate[i] * 100);
+      if (q.type === 'scale') {
+        const avgGuess =
+          attempts.reduce((sum, a) => sum + a.guesses[i], 0) / attempts.length;
+        return {
+          type: 'scale',
+          prompt: q.prompt,
+          makerAnswer: `${quiz.answers[i] + 1}/5`,
+          percentCorrect: pct,
+          avgGuess: Math.round((avgGuess + 1) * 10) / 10,
+          minLabel: q.minLabel,
+          maxLabel: q.maxLabel,
+        };
+      }
       return {
+        type: 'mc',
         prompt: q.prompt,
         makerAnswer: q.options[quiz.answers[i]],
         percentCorrect: pct,

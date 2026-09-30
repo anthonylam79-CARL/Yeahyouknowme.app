@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
+import { formatScore } from '@/lib/format';
 
 export default function ResultsPage() {
   const { id } = useParams();
@@ -83,11 +84,17 @@ export default function ResultsPage() {
           <p>
             <strong>What people get right:</strong> "{insights.mostGuessed.prompt}" —{' '}
             {insights.mostGuessed.percentCorrect}% guessed "{insights.mostGuessed.makerAnswer}" correctly.
+            {insights.mostGuessed.type === 'scale' && (
+              <> People guessed {insights.mostGuessed.avgGuess}/5 on average (leaning {insights.mostGuessed.avgGuess >= 3 ? insights.mostGuessed.maxLabel.toLowerCase() : insights.mostGuessed.minLabel.toLowerCase()}).</>
+            )}
           </p>
           {insights.leastGuessed && (
             <p>
               <strong>What people get wrong:</strong> "{insights.leastGuessed.prompt}" — only{' '}
               {insights.leastGuessed.percentCorrect}% got "{insights.leastGuessed.makerAnswer}" right.
+              {insights.leastGuessed.type === 'scale' && (
+                <> People guessed {insights.leastGuessed.avgGuess}/5 on average (leaning {insights.leastGuessed.avgGuess >= 3 ? insights.leastGuessed.maxLabel.toLowerCase() : insights.leastGuessed.minLabel.toLowerCase()}).</>
+              )}
             </p>
           )}
         </>
@@ -113,7 +120,7 @@ export default function ResultsPage() {
           <h2>Ranking</h2>
           {attempts.map((a, k) => (
             <p key={k} className="miss">
-              {k + 1}. {a.name} · {a.score}/{data.length}
+              {k + 1}. {a.name} · {formatScore(a.score)}/{data.length}
               {k === 0 ? ' 👑 knows you best' : ''}
             </p>
           ))}

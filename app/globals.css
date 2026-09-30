@@ -208,6 +208,47 @@ small {
   margin-top: 10px;
 }
 
+.scale {
+  margin-bottom: 10px;
+}
+
+.scale-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.scale-btn {
+  flex: 1;
+  font: inherit;
+  font-weight: 800;
+  font-size: 1.1rem;
+  padding: 16px 0;
+  border-radius: 14px;
+  border: 2px solid color-mix(in srgb, var(--fg) 18%, transparent);
+  background: var(--card);
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.scale-btn.ok {
+  border-color: var(--ok);
+  background: color-mix(in srgb, var(--ok) 18%, var(--card));
+}
+
+.scale-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.85rem;
+  color: var(--mut);
+  margin-bottom: 16px;
+}
+
+.scale-labels span:last-child {
+  text-align: right;
+}
+
 .paywall {
   background: var(--card);
   border: 2px dashed color-mix(in srgb, var(--fg) 20%, transparent);

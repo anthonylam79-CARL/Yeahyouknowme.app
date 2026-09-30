@@ -3,7 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import ShareRow from '@/components/ShareRow';
+import ScaleInput from '@/components/ScaleInput';
 import { pickTakerCaption } from '@/lib/captions';
+import { formatScore } from '@/lib/format';
 
 const AGE_BRACKETS = ['13-17', '18-24', '25-34', '35-44', '45+'];
 const GENDERS = ['Woman', 'Man', 'Nonbinary', 'Prefer not to say'];
@@ -117,15 +119,19 @@ export default function PlayPage() {
         </div>
         <small>Guess what {quiz.makerName} picked</small>
         <h2>{q.prompt}</h2>
-        {q.options.map((opt, k) => (
-          <button
-            key={k}
-            className={'opt' + (picked === k ? ' ok' : '')}
-            onClick={() => pick(k)}
-          >
-            {opt}
-          </button>
-        ))}
+        {q.type === 'scale' ? (
+          <ScaleInput minLabel={q.minLabel} maxLabel={q.maxLabel} selected={picked} onSelect={pick} />
+        ) : (
+          q.options.map((opt, k) => (
+            <button
+              key={k}
+              className={'opt' + (picked === k ? ' ok' : '')}
+              onClick={() => pick(k)}
+            >
+              {opt}
+            </button>
+          ))
+        )}
         {picked !== null && (
           <button className="btn" onClick={next}>
             {i + 1 < quiz.questions.length ? 'Next' : 'See my score'}
@@ -153,7 +159,7 @@ export default function PlayPage() {
       <div className="score">
         <span>You vs {quiz.makerName}</span>
         <b>
-          {attemptResult.score}/{attemptResult.total}
+          {formatScore(attemptResult.score)}/{attemptResult.total}
         </b>
         <span>Rank #{attemptResult.rank} of {attemptResult.outOf}</span>
       </div>

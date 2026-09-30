@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { AUDIENCES, QUESTIONS } from '@/lib/questions';
 import { pickQuestionIds } from '@/lib/pick';
 import ShareRow from '@/components/ShareRow';
+import ScaleInput from '@/components/ScaleInput';
 import { pickMakerCaption } from '@/lib/captions';
 
 const LENGTHS = { Quick: 10, Standard: 15, Deep: 20 };
@@ -158,11 +159,15 @@ export default function HomePage() {
         </div>
         <small>Answer about yourself</small>
         <h2>{q.prompt}</h2>
-        {q.options.map((opt, k) => (
-          <button key={k} className="opt" onClick={() => pick(k)}>
-            {opt}
-          </button>
-        ))}
+        {q.type === 'scale' ? (
+          <ScaleInput minLabel={q.minLabel} maxLabel={q.maxLabel} selected={null} onSelect={pick} />
+        ) : (
+          q.options.map((opt, k) => (
+            <button key={k} className="opt" onClick={() => pick(k)}>
+              {opt}
+            </button>
+          ))
+        )}
         <button className="btn alt" onClick={swap}>
           Swap this question
         </button>
