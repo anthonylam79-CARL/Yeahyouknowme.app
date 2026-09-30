@@ -41,6 +41,12 @@ export async function POST(request) {
     return NextResponse.json({ error: 'This quiz is already unlocked' }, { status: 400 });
   }
 
+  const productId = process.env.STRIPE_PRODUCT_ID;
+  if (!productId) {
+    console.error('checkout: missing STRIPE_PRODUCT_ID env var');
+    return NextResponse.json({ error: 'Payments not configured yet' }, { status: 500 });
+  }
+
   let session;
   try {
     const stripe = stripeClient();
@@ -49,12 +55,14 @@ export async function POST(request) {
       mode: 'payment',
       line_items: [
         {
+          // Priced dynamically against a persisted Product (STRIPE_PRODUCT_ID)
+          // rather than an ad-hoc product_data blob, because this account's
+          // Managed Payments setup requires every line item to carry a tax
+          // code — and that's set once, correctly, on the Product itself via
+          // the Stripe dashboard, rather than guessed here in code.
           price_data: {
             currency: 'usd',
-            product_data: {
-              name: `Unlock full insights — ${quiz.maker_name}'s quiz`,
-              description: 'See what people get right, what they get wrong, and your full open-book rating.',
-            },
+            product: productId,
             unit_amount: PREMIUM_PRICE_CENTS,
           },
           quantity: 1,
@@ -63,13 +71,6 @@ export async function POST(request) {
       success_url: `${origin}/results/${quizId}?token=${encodeURIComponent(token)}&unlocked=1`,
       cancel_url: `${origin}/results/${quizId}?token=${encodeURIComponent(token)}`,
       metadata: { quizId },
-      // This account has a Dashboard-level default to calculate tax on
-      // Checkout Sessions, which requires a tax code on every line item
-      // unless explicitly turned off here. We don't have an active tax
-      // registration set up, so we opt this session out rather than
-      // guess at a tax code — see stripe-best-practices: automatic_tax
-      // should only be enabled once a registration exists.
-      automatic_tax: { enabled: false },
     });
   } catch (err) {
     console.error('stripe checkout session creation failed', err);
