@@ -63,6 +63,13 @@ export async function POST(request) {
       success_url: `${origin}/results/${quizId}?token=${encodeURIComponent(token)}&unlocked=1`,
       cancel_url: `${origin}/results/${quizId}?token=${encodeURIComponent(token)}`,
       metadata: { quizId },
+      // This account has a Dashboard-level default to calculate tax on
+      // Checkout Sessions, which requires a tax code on every line item
+      // unless explicitly turned off here. We don't have an active tax
+      // registration set up, so we opt this session out rather than
+      // guess at a tax code — see stripe-best-practices: automatic_tax
+      // should only be enabled once a registration exists.
+      automatic_tax: { enabled: false },
     });
   } catch (err) {
     console.error('stripe checkout session creation failed', err);
