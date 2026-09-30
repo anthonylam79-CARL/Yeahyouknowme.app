@@ -12,7 +12,12 @@ const LENGTHS = { Quick: 10, Standard: 15, Deep: 20 };
 export default function HomePage() {
   const [step, setStep] = useState('setup'); // setup | answer | done | saving | error
   const [audience, setAudience] = useState('Partner');
-  const [category, setCategory] = useState('Mix it up');
+  // No category picker in the UI anymore — every quiz mixes across all of
+  // an audience's categories. `poolFor`/`CATEGORIES` still exist in
+  // lib/questions.js (they're how "Mix it up" is built, and how
+  // Long distance/Flirty stay excluded from it), just nothing here lets
+  // the person choose a narrower one.
+  const category = 'Mix it up';
   const [length, setLength] = useState('Standard');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -21,8 +26,6 @@ export default function HomePage() {
   const [i, setI] = useState(0);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
-
-  const categories = AUDIENCES[audience];
 
   function start() {
     if (!name.trim()) return;
@@ -91,25 +94,9 @@ export default function HomePage() {
             <button
               key={a}
               className={'chip' + (a === audience ? ' on' : '')}
-              onClick={() => {
-                setAudience(a);
-                setCategory('Mix it up');
-              }}
+              onClick={() => setAudience(a)}
             >
               {a}
-            </button>
-          ))}
-        </div>
-
-        <small>Pick a vibe</small>
-        <div className="chips">
-          {categories.map((c) => (
-            <button
-              key={c}
-              className={'chip' + (c === category ? ' on' : '')}
-              onClick={() => setCategory(c)}
-            >
-              {c}
             </button>
           ))}
         </div>
