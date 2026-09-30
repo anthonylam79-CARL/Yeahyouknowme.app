@@ -208,6 +208,18 @@ small {
   margin-top: 10px;
 }
 
+.paywall {
+  background: var(--card);
+  border: 2px dashed color-mix(in srgb, var(--fg) 20%, transparent);
+  border-radius: 24px;
+  padding: 22px;
+  margin-bottom: 20px;
+}
+
+.paywall .btn {
+  margin-top: 12px;
+}
+
 .error {
   color: var(--bad);
   font-weight: 700;

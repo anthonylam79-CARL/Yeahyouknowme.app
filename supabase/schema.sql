@@ -14,6 +14,7 @@ create table if not exists quizzes (
   answers integer[] not null,                    -- maker's picks, 0-3, same length as question_ids. NEVER exposed to guessers.
   owner_token_hash text not null,                 -- sha256(owner_token), lets the maker fetch full results
   maker_email text,                               -- optional, for notifications
+  is_premium boolean not null default false,       -- unlocked via Stripe checkout ($1.99/quiz), see /api/checkout + /api/stripe/webhook
   created_at timestamptz not null default now()
 );
 

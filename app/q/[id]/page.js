@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import ShareRow from '@/components/ShareRow';
+import { pickTakerCaption } from '@/lib/captions';
 
 const AGE_BRACKETS = ['13-17', '18-24', '25-34', '35-44', '45+'];
 const GENDERS = ['Woman', 'Man', 'Nonbinary', 'Prefer not to say'];
@@ -140,7 +141,12 @@ export default function PlayPage() {
 
   // result
   const link = typeof window !== 'undefined' ? window.location.href : '';
-  const post = `I got ${attemptResult.score}/${attemptResult.total} on ${quiz.makerName}'s quiz. Can you beat me? 👇`;
+  const post = pickTakerCaption({
+    makerName: quiz.makerName,
+    score: attemptResult.score,
+    total: attemptResult.total,
+    rank: attemptResult.rank,
+  });
 
   return (
     <>

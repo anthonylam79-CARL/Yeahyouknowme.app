@@ -29,7 +29,7 @@ export async function GET(request, { params }) {
 
   const { data: quiz, error: quizError } = await db
     .from('quizzes')
-    .select('id, maker_name, audience, question_ids, answers, owner_token_hash, created_at')
+    .select('id, maker_name, audience, question_ids, answers, owner_token_hash, is_premium, created_at')
     .eq('id', id)
     .maybeSingle();
 
@@ -58,8 +58,15 @@ export async function GET(request, { params }) {
 
   const length = quiz.question_ids.length;
 
+  // Full insights (rating, what people get right/wrong) are a $1.99/quiz
+  // unlock via Stripe — see /api/checkout. Everyone with the owner token can
+  // still see the plain ranking above; this is the only gated part.
   let insights = null;
-  if (attempts.length > 0) {
+  let insightsLocked = false;
+  if (attempts.length > 0 && !quiz.is_premium) {
+    insightsLocked = true;
+  }
+  if (attempts.length > 0 && quiz.is_premium) {
     const rate = quiz.question_ids.map(
       (_, i) => attempts.filter((a) => a.hits[i]).length / attempts.length
     );
@@ -103,6 +110,8 @@ export async function GET(request, { params }) {
       score: a.score,
       createdAt: a.created_at,
     })),
+    isPremium: quiz.is_premium,
     insights,
+    insightsLocked,
   });
 }

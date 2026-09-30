@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { AUDIENCES, QUESTIONS } from '@/lib/questions';
 import { pickQuestionIds } from '@/lib/pick';
 import ShareRow from '@/components/ShareRow';
+import { pickMakerCaption } from '@/lib/captions';
 
 const LENGTHS = { Quick: 10, Standard: 15, Deep: 20 };
 
@@ -188,7 +189,7 @@ export default function HomePage() {
   // done
   const link = `${typeof window !== 'undefined' ? window.location.origin : ''}/q/${result.id}`;
   const resultsLink = `${typeof window !== 'undefined' ? window.location.origin : ''}/results/${result.id}?token=${result.ownerToken}`;
-  const post = "Think you know me? Let's see who actually does 👇";
+  const post = pickMakerCaption(name.trim() || 'me');
 
   return (
     <>

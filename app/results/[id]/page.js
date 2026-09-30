@@ -10,6 +10,9 @@ export default function ResultsPage() {
 
   const [phase, setPhase] = useState('loading'); // loading | denied | ready
   const [data, setData] = useState(null);
+  const [unlocking, setUnlocking] = useState(false);
+  const [unlockError, setUnlockError] = useState('');
+  const justUnlocked = searchParams.get('unlocked') === '1';
 
   useEffect(() => {
     if (!token) {
@@ -24,6 +27,24 @@ export default function ResultsPage() {
       })
       .catch(() => setPhase('denied'));
   }, [id, token]);
+
+  async function unlock() {
+    setUnlocking(true);
+    setUnlockError('');
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quizId: id, token }),
+      });
+      const body = await res.json();
+      if (!res.ok || !body.url) throw new Error(body.error || 'Could not start checkout');
+      window.location.href = body.url;
+    } catch (err) {
+      setUnlockError(err.message || 'Something went wrong. Try again.');
+      setUnlocking(false);
+    }
+  }
 
   if (phase === 'loading') return <p>Loading…</p>;
 
@@ -42,11 +63,13 @@ export default function ResultsPage() {
     );
   }
 
-  const { makerName, attempts, insights } = data;
+  const { makerName, attempts, insights, insightsLocked } = data;
 
   return (
     <>
       <h1>Who knows {makerName} best</h1>
+
+      {justUnlocked && <p className="note">🎉 Unlocked! Your full insights are below.</p>}
 
       {insights ? (
         <>
@@ -68,6 +91,17 @@ export default function ResultsPage() {
             </p>
           )}
         </>
+      ) : insightsLocked ? (
+        <div className="paywall">
+          <p>
+            <strong>Your full insights are ready</strong> — open-book rating, what people get right, and
+            what trips them up.
+          </p>
+          <button className="btn" onClick={unlock} disabled={unlocking}>
+            {unlocking ? 'Redirecting…' : 'Unlock for $1.99'}
+          </button>
+          {unlockError && <p className="note">{unlockError}</p>}
+        </div>
       ) : (
         <p>Nobody's taken your quiz yet. Share the link to get your first result.</p>
       )}
