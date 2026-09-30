@@ -14,7 +14,14 @@ const HIT_THRESHOLD = 0.75;
 // how close the guess was, so the final score reflects real closeness
 // rather than only exact hits.
 function creditFor(question, guess, answer) {
-  if (!question || question.type !== 'scale') {
+  // "Talking point" questions (personality/scenario) are never scored —
+  // they exist to surface a gap between self-perception and how someone's
+  // actually seen, not to be gotten "right". See results/route.js for how
+  // they're surfaced instead, as talkingPoints.
+  if (!question || question.topic) {
+    return 0;
+  }
+  if (question.type !== 'scale') {
     return guess === answer ? 1 : 0;
   }
   const span = question.max - question.min; // 4, for a 0-4 (1-5 displayed) scale
@@ -100,10 +107,17 @@ export async function POST(request, { params }) {
       ).length;
   }
 
+  // "total" is out of the scoreable questions only — talking-point
+  // questions never contribute to score, so they shouldn't count toward
+  // the denominator either (a 6/8 would wrongly read as 2 missed).
+  const scoreableTotal = quiz.question_ids.filter(
+    (qid) => !QUESTIONS[qid]?.topic
+  ).length;
+
   return NextResponse.json(
     {
       score,
-      total: quiz.question_ids.length,
+      total: scoreableTotal,
       hits,
       rank,
       outOf: total,

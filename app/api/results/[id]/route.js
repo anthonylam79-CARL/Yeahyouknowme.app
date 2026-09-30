@@ -67,18 +67,32 @@ export async function GET(request, { params }) {
     insightsLocked = true;
   }
   if (attempts.length > 0 && quiz.is_premium) {
-    const rate = quiz.question_ids.map(
-      (_, i) => attempts.filter((a) => a.hits[i]).length / attempts.length
-    );
-    let hi = 0;
-    let lo = 0;
-    rate.forEach((v, i) => {
-      if (v > rate[hi]) hi = i;
-      if (v < rate[lo]) lo = i;
+    // Talking-point (personality/scenario) questions are never scored —
+    // keep them out of the right/wrong insights entirely, and surface
+    // them separately below.
+    const scoreableIdx = quiz.question_ids
+      .map((_, i) => i)
+      .filter((i) => !QUESTIONS[quiz.question_ids[i]]?.topic);
+    const topicIdx = quiz.question_ids
+      .map((_, i) => i)
+      .filter((i) => QUESTIONS[quiz.question_ids[i]]?.topic);
+
+    const rate = {};
+    scoreableIdx.forEach((i) => {
+      rate[i] = attempts.filter((a) => a.hits[i]).length / attempts.length;
+    });
+    let hi = scoreableIdx[0];
+    let lo = scoreableIdx[0];
+    scoreableIdx.forEach((i) => {
+      if (rate[i] > rate[hi]) hi = i;
+      if (rate[i] < rate[lo]) lo = i;
     });
 
     const totalHits = attempts.reduce((sum, a) => sum + a.score, 0);
-    const ratingScore = Math.round((totalHits / (attempts.length * length)) * 100);
+    const ratingScore =
+      scoreableIdx.length > 0
+        ? Math.round((totalHits / (attempts.length * scoreableIdx.length)) * 100)
+        : 0;
 
     const describe = (i) => {
       const q = QUESTIONS[quiz.question_ids[i]];
@@ -104,11 +118,43 @@ export async function GET(request, { params }) {
       };
     };
 
+    // No right/wrong for these — just the maker's own answer next to
+    // what guessers actually said, as a conversation starter.
+    const describeTopic = (i) => {
+      const q = QUESTIONS[quiz.question_ids[i]];
+      if (q.type === 'scale') {
+        const avgGuess =
+          attempts.reduce((sum, a) => sum + a.guesses[i], 0) / attempts.length;
+        return {
+          type: 'scale',
+          prompt: q.prompt,
+          makerAnswer: `${quiz.answers[i] + 1}/5`,
+          avgGuess: Math.round((avgGuess + 1) * 10) / 10,
+          minLabel: q.minLabel,
+          maxLabel: q.maxLabel,
+        };
+      }
+      const counts = {};
+      attempts.forEach((a) => {
+        counts[a.guesses[i]] = (counts[a.guesses[i]] || 0) + 1;
+      });
+      const topGuessIdx = Number(
+        Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0]
+      );
+      return {
+        type: 'mc',
+        prompt: q.prompt,
+        makerAnswer: q.options[quiz.answers[i]],
+        topGuess: q.options[topGuessIdx],
+      };
+    };
+
     insights = {
       ratingScore,
       ratingLabel: labelFor(ratingScore),
-      mostGuessed: describe(hi),
-      leastGuessed: hi === lo ? null : describe(lo),
+      mostGuessed: hi !== undefined ? describe(hi) : null,
+      leastGuessed: hi !== undefined && hi !== lo ? describe(lo) : null,
+      talkingPoints: topicIdx.map(describeTopic),
       basedOn: attempts.length,
     };
   }

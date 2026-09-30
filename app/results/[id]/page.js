@@ -97,6 +97,24 @@ export default function ResultsPage() {
               )}
             </p>
           )}
+
+          {insights.talkingPoints && insights.talkingPoints.length > 0 && (
+            <>
+              <div className="sep" />
+              <h2>Talk about this</h2>
+              <p className="note">Not right-or-wrong — just how you see yourself vs. how you come across.</p>
+              {insights.talkingPoints.map((tp, k) => (
+                <p key={k}>
+                  <strong>"{tp.prompt}"</strong> — you said "{tp.makerAnswer}".
+                  {tp.type === 'scale' ? (
+                    <> People guessed {tp.avgGuess}/5 on average (leaning {tp.avgGuess >= 3 ? tp.maxLabel.toLowerCase() : tp.minLabel.toLowerCase()}).</>
+                  ) : (
+                    <> Most people guessed "{tp.topGuess}".</>
+                  )}
+                </p>
+              ))}
+            </>
+          )}
         </>
       ) : insightsLocked ? (
         <div className="paywall">
