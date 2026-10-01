@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
+import ShareRow from '@/components/ShareRow';
 import { formatScore } from '@/lib/format';
+import { pickMakerCaption } from '@/lib/captions';
 
 export default function ResultsPage() {
   const { id } = useParams();
@@ -65,12 +67,19 @@ export default function ResultsPage() {
   }
 
   const { makerName, attempts, insights, insightsLocked } = data;
+  const link = `${typeof window !== 'undefined' ? window.location.origin : ''}/q/${id}`;
 
   return (
     <>
       <h1>Who knows {makerName} best</h1>
 
       {justUnlocked && <p className="note">🎉 Unlocked! Your full insights are below.</p>}
+
+      <p className="note">Your quiz link — share it any time, this page doesn't change it:</p>
+      <input readOnly value={link} onFocus={(e) => e.target.select()} />
+      <ShareRow text={pickMakerCaption(makerName)} link={link} />
+
+      <div className="sep" />
 
       {insights ? (
         <>
