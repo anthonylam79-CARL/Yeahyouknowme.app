@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
-const MIN_SAMPLE = 100;
+// 100 was the original bar, but that's 100 people in the exact same
+// age-bracket + gender + quiz-length combination (5 brackets x 4 genders x
+// 3 lengths = up to 6,000 attempts site-wide before this ever turns on for
+// anyone). 20 is still enough that a percentile isn't a coin flip between a
+// handful of people, but low enough to actually show up early on.
+const MIN_SAMPLE = 20;
 
 // POST /api/percentile — "where do I rank" for a guesser, aggregated across
 // every quiz of the same length and bracket, never fabricated. Per the
