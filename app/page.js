@@ -5,9 +5,11 @@ import { AUDIENCES, QUESTIONS } from '@/lib/questions';
 import { pickQuestionIds } from '@/lib/pick';
 import ShareRow from '@/components/ShareRow';
 import ScaleInput from '@/components/ScaleInput';
+import Hero from '@/components/Hero';
 import { pickMakerCaption } from '@/lib/captions';
 
 const LENGTHS = { Quick: 10, Standard: 15, Deep: 20 };
+const AUDIENCE_EMOJI = { Partner: '💕', BFF: '👯', Fam: '🏠' };
 
 export default function HomePage() {
   const [step, setStep] = useState('setup'); // setup | answer | done | saving | error
@@ -85,6 +87,7 @@ export default function HomePage() {
   if (step === 'setup') {
     return (
       <>
+        <Hero />
         <h1>How well do they really know you?</h1>
         <p>Answer about yourself. Send the link. They guess. Everyone sees the score.</p>
 
@@ -96,7 +99,7 @@ export default function HomePage() {
               className={'chip' + (a === audience ? ' on' : '')}
               onClick={() => setAudience(a)}
             >
-              {a}
+              {AUDIENCE_EMOJI[a]} {a}
             </button>
           ))}
         </div>

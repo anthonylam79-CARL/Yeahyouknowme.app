@@ -265,3 +265,45 @@ small {
   color: var(--bad);
   font-weight: 700;
 }
+
+.hero-art {
+  width: 230px;
+  max-width: 62%;
+  height: auto;
+  display: block;
+  margin: 4px 0 2px;
+}
+
+.hero-card {
+  transform: rotate(var(--rot));
+  transform-origin: 0px 0px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-card {
+    animation: hero-fan 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  .hero-card-1 {
+    animation-delay: 0s;
+  }
+
+  .hero-card-2 {
+    animation-delay: 0.08s;
+  }
+
+  .hero-card-3 {
+    animation-delay: 0.16s;
+  }
+}
+
+@keyframes hero-fan {
+  from {
+    transform: rotate(0deg) scale(0.85);
+    opacity: 0;
+  }
+  to {
+    transform: rotate(var(--rot)) scale(1);
+    opacity: 1;
+  }
+}
