@@ -3,35 +3,22 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
+export const alt = 'Think you know them? Take the quiz.';
+
+// Force this route to actually run per-request rather than being treated
+// as a static/cacheable file-convention route. `generateImageMetadata`
+// used to live here just to set a per-quiz alt string, but it also made
+// Next emit this as an SSG route under a synthetic
+// `/q/[id]/opengraph-image/[__metadata_id__]` path, which is exactly the
+// kind of ambiguity that leads to a crawler (Twitterbot et al.) getting a
+// stale/empty/mismatched image. Not worth it for alt text alone.
+export const dynamic = 'force-dynamic';
 
 const AUDIENCE_LABEL = {
   Partner: 'Partner Edition',
   BFF: 'Best Friend Edition',
   Fam: 'Family Edition',
 };
-
-export async function generateImageMetadata({ params }) {
-  // A single-variant array, not multiple images — this just lets us set a
-  // per-quiz alt text dynamically. The route itself is already dynamic
-  // (one rendered image per :id), so `id` here just needs to be *a* stable
-  // string, not a real "variant" identifier.
-  const { id } = await params;
-  const db = supabaseAdmin();
-  const { data } = await db
-    .from('quizzes')
-    .select('maker_name')
-    .eq('id', id)
-    .maybeSingle();
-
-  return [
-    {
-      id: 'default',
-      alt: data ? `Think you know ${data.maker_name}? Take the quiz.` : 'Yeah You Know Me',
-      size,
-      contentType,
-    },
-  ];
-}
 
 export default async function Image({ params }) {
   const { id } = await params;

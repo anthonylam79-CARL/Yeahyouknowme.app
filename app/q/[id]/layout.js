@@ -15,6 +15,18 @@ export async function generateMetadata({ params }) {
     .eq('id', id)
     .maybeSingle();
 
+  // Deliberately NOT setting `openGraph.images`/`twitter.images` here.
+  // Next.js auto-fills `openGraph.images` per-segment from the sibling
+  // opengraph-image.js file (this folder has one), and separately mirrors
+  // that resolved `openGraph.images` into `twitter.images` whenever this
+  // object doesn't declare its own — that's confirmed by testing against
+  // a local build. Setting them explicitly here actually broke it: this
+  // layout-level object sits ABOVE the page segment the image file lives
+  // in, so an explicit value here got silently clobbered by the file
+  // convention for og:image but NOT for twitter:image (since the mirror
+  // only runs when twitter.images is absent), leaving the X/Twitter card
+  // stuck on the wrong image. Omitting both lets the same file-convention
+  // image reach og:image and twitter:image consistently.
   if (!quiz) {
     return { title: 'Yeah You Know Me' };
   }
