@@ -266,6 +266,21 @@ small {
   font-weight: 700;
 }
 
+.returning {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--fg);
+  text-decoration: none;
+  margin: 0 0 22px;
+}
+
+.returning span {
+  color: var(--pink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .hero-art {
   width: 230px;
   max-width: 62%;

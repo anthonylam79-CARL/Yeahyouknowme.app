@@ -91,6 +91,10 @@ export default function HomePage() {
         <h1>How well do they really know you?</h1>
         <p>Answer about yourself. Send the link. They guess. Everyone sees the score.</p>
 
+        <a className="returning" href="/recover">
+          Made a quiz before? <span>Find your results</span>
+        </a>
+
         <small>Who is it for?</small>
         <div className="chips">
           {Object.keys(AUDIENCES).map((a) => (
@@ -133,9 +137,6 @@ export default function HomePage() {
         <button className="btn" onClick={start}>
           Make my quiz
         </button>
-        <p className="note">
-          Already made a quiz and lost the link? <a href="/recover">Recover it here</a>.
-        </p>
       </>
     );
   }
