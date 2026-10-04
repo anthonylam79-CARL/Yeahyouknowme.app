@@ -1,24 +1,35 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import ShareRow from '@/components/ShareRow';
 import ScaleInput from '@/components/ScaleInput';
+import { Stage, Receipt } from '@/components/Reveal';
 import { pickTakerCaption } from '@/lib/captions';
-import { formatScore } from '@/lib/format';
 
 const AGE_BRACKETS = ['13-17', '18-24', '25-34', '35-44', '45+'];
 const GENDERS = ['Woman', 'Man', 'Nonbinary', 'Prefer not to say'];
 
+// How long a tapped answer stays "pressed in" before the next question.
+const LOCK_IN_MS = 320;
+
+function reducedMotion() {
+  return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
 export default function PlayPage() {
   const { id } = useParams();
-  const [phase, setPhase] = useState('loading'); // loading | notfound | intro | quiz | checking | result
+  const [phase, setPhase] = useState('loading'); // loading | notfound | intro | quiz | checking | error | result
   const [quiz, setQuiz] = useState(null);
   const [me, setMe] = useState('');
   const [i, setI] = useState(0);
   const [guesses, setGuesses] = useState([]);
-  const [picked, setPicked] = useState(null); // index just clicked, for feedback
+  const [picked, setPicked] = useState(null); // the tile shown as locked in
+  const [locked, setLocked] = useState(false); // true for the beat between tap and next question
   const [attemptResult, setAttemptResult] = useState(null);
+  const [submitError, setSubmitError] = useState('');
+  const [cardBusy, setCardBusy] = useState(false);
+  const [cardError, setCardError] = useState('');
   const [ageBracket, setAgeBracket] = useState('');
   const [gender, setGender] = useState('');
   const [percentile, setPercentile] = useState(null);
@@ -33,35 +44,64 @@ export default function PlayPage() {
       .catch(() => setPhase('notfound'));
   }, [id]);
 
-  async function pick(optionIndex) {
-    // Selecting again before hitting Next just changes the pick.
-    setPicked(optionIndex);
+  // Picked once per result so the caption doesn't reshuffle on every re-render.
+  const post = useMemo(
+    () =>
+      quiz && attemptResult
+        ? pickTakerCaption({
+            makerName: quiz.makerName,
+            score: attemptResult.score,
+            total: attemptResult.total,
+            rank: attemptResult.rank,
+          })
+        : '',
+    [quiz, attemptResult]
+  );
+
+  // One tap per question: lock the tile in, then move on.
+  function pick(optionIndex) {
+    if (locked) return;
     const next = [...guesses];
     next[i] = optionIndex;
     setGuesses(next);
+    setPicked(optionIndex);
+    setLocked(true);
+    setTimeout(() => advance(next), reducedMotion() ? 0 : LOCK_IN_MS);
   }
 
-  function next() {
+  function advance(next) {
+    setLocked(false);
     if (i + 1 < quiz.questions.length) {
       setI(i + 1);
-      setPicked(null);
+      setPicked(next[i + 1] ?? null);
     } else {
-      submit(guesses);
+      submit(next);
     }
+  }
+
+  function back() {
+    if (locked || i === 0) return;
+    setI(i - 1);
+    setPicked(guesses[i - 1] ?? null);
   }
 
   async function submit(finalGuesses) {
     setPhase('checking');
-    const res = await fetch(`/api/quizzes/${id}/attempts`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ guesserName: me, guesses: finalGuesses, ageBracket: null, gender: null }),
-    });
-    const data = await res.json();
-    setTimeout(() => {
+    setSubmitError('');
+    try {
+      const res = await fetch(`/api/quizzes/${id}/attempts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guesserName: me, guesses: finalGuesses, ageBracket: null, gender: null }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Something went wrong');
       setAttemptResult(data);
       setPhase('result');
-    }, 1000);
+    } catch (err) {
+      setSubmitError(err.message || 'Something went wrong');
+      setPhase('error');
+    }
   }
 
   async function checkPercentile() {
@@ -79,12 +119,53 @@ export default function PlayPage() {
     setPercentile(await res.json());
   }
 
+  // The result card is a PNG built by /api/card. On phones that can share
+  // files it opens the share sheet (Stories, Messages, etc.); elsewhere it
+  // downloads.
+  async function shareCard() {
+    setCardBusy(true);
+    setCardError('');
+    try {
+      const qs = new URLSearchParams({
+        m: quiz.makerName,
+        g: me,
+        s: String(attemptResult.score),
+        t: String(attemptResult.total),
+      });
+      const res = await fetch(`/api/card?${qs}`);
+      if (!res.ok) throw new Error('card failed');
+      const blob = await res.blob();
+      const file = new File([blob], 'yeah-you-know-me.png', { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], text: `${post} ${window.location.href}` });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'yeah-you-know-me.png';
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+    } catch (err) {
+      if (err && err.name === 'AbortError') {
+        /* closed the share sheet — not an error */
+      } else {
+        setCardError("Couldn't make your card. Try again in a moment.");
+      }
+    } finally {
+      setCardBusy(false);
+    }
+  }
+
   if (phase === 'loading') return <p>Loading…</p>;
   if (phase === 'notfound') {
     return (
       <>
         <h1>Can't find that quiz</h1>
         <p>The link might be wrong, or the quiz was deleted.</p>
+        <a className="btn" href="/">
+          Make your own quiz
+        </a>
       </>
     );
   }
@@ -99,11 +180,9 @@ export default function PlayPage() {
           maxLength={30}
           value={me}
           onChange={(e) => setMe(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && me.trim() && setPhase('quiz')}
         />
-        <button
-          className="btn"
-          onClick={() => me.trim() && setPhase('quiz')}
-        >
+        <button className="btn" onClick={() => me.trim() && setPhase('quiz')}>
           Start
         </button>
       </>
@@ -120,21 +199,29 @@ export default function PlayPage() {
         <small>Guess what {quiz.makerName} picked</small>
         <h2>{q.prompt}</h2>
         {q.type === 'scale' ? (
-          <ScaleInput minLabel={q.minLabel} maxLabel={q.maxLabel} selected={picked} onSelect={pick} />
+          <ScaleInput
+            minLabel={q.minLabel}
+            maxLabel={q.maxLabel}
+            selected={picked}
+            onSelect={pick}
+            disabled={locked}
+          />
         ) : (
           q.options.map((opt, k) => (
             <button
               key={k}
-              className={'opt' + (picked === k ? ' ok' : '')}
+              className={'opt' + (picked === k ? ' picked' : '')}
               onClick={() => pick(k)}
+              disabled={locked}
+              aria-pressed={picked === k}
             >
               {opt}
             </button>
           ))
         )}
-        {picked !== null && (
-          <button className="btn" onClick={next}>
-            {i + 1 < quiz.questions.length ? 'Next' : 'See my score'}
+        {i > 0 && (
+          <button className="link-btn" onClick={back} disabled={locked}>
+            Back
           </button>
         )}
       </>
@@ -145,26 +232,42 @@ export default function PlayPage() {
     return <h1>Checking your answers…</h1>;
   }
 
+  if (phase === 'error') {
+    return (
+      <>
+        <h1>Couldn't save your guesses</h1>
+        <p className="error">{submitError}</p>
+        <button className="btn" onClick={() => submit(guesses)}>
+          Try again
+        </button>
+      </>
+    );
+  }
+
   // result
   const link = typeof window !== 'undefined' ? window.location.href : '';
-  const post = pickTakerCaption({
-    makerName: quiz.makerName,
-    score: attemptResult.score,
-    total: attemptResult.total,
-    rank: attemptResult.rank,
-  });
 
   return (
     <>
-      <div className="score">
-        <span>You vs {quiz.makerName}</span>
-        <b>
-          {formatScore(attemptResult.score)}/{attemptResult.total}
-        </b>
-        <span>Rank #{attemptResult.rank} of {attemptResult.outOf}</span>
-      </div>
+      <Stage
+        makerName={quiz.makerName}
+        questions={quiz.questions}
+        hits={attemptResult.hits}
+        score={attemptResult.score}
+        total={attemptResult.total}
+        rank={attemptResult.rank}
+        outOf={attemptResult.outOf}
+      />
 
+      <button className="btn" onClick={shareCard} disabled={cardBusy}>
+        {cardBusy ? 'Making your card…' : 'Share my result card'}
+      </button>
+      {cardError && <p className="error">{cardError}</p>}
       <ShareRow text={post} link={link} />
+
+      <div className="sep" />
+
+      <Receipt questions={quiz.questions} hits={attemptResult.hits} />
 
       <div className="sep" />
 
@@ -176,6 +279,7 @@ export default function PlayPage() {
           <button
             key={a}
             className={'chip' + (a === ageBracket ? ' on' : '')}
+            aria-pressed={a === ageBracket}
             onClick={() => {
               setAgeBracket(a);
             }}
@@ -190,6 +294,7 @@ export default function PlayPage() {
           <button
             key={g}
             className={'chip' + (g === gender ? ' on' : '')}
+            aria-pressed={g === gender}
             onClick={() => {
               setGender(g);
             }}

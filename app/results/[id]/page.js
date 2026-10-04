@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import ShareRow from '@/components/ShareRow';
 import { formatScore } from '@/lib/format';
+import { verdictFor } from '@/lib/verdict';
 import { pickMakerCaption } from '@/lib/captions';
 
 export default function ResultsPage() {
@@ -75,11 +76,25 @@ export default function ResultsPage() {
 
       {justUnlocked && <p className="note">🎉 Unlocked! Your full insights are below.</p>}
 
-      <p className="note">Your quiz link — share it any time, this page doesn't change it:</p>
-      <input readOnly value={link} onFocus={(e) => e.target.select()} />
-      <ShareRow text={pickMakerCaption(makerName)} link={link} />
-
-      <div className="sep" />
+      {attempts.length > 0 && (
+        <>
+          <ol className="board">
+            {attempts.map((a, k) => (
+              <li key={k} className={k === 0 ? 'top' : ''}>
+                <span className="board-rank">{k + 1}</span>
+                <span className="board-name">
+                  {a.name}
+                  <small>{verdictFor(a.score, data.total, makerName).title}</small>
+                </span>
+                <span className="board-score">
+                  {formatScore(a.score)}/{data.total}
+                </span>
+              </li>
+            ))}
+          </ol>
+          <div className="sep" />
+        </>
+      )}
 
       {insights ? (
         <>
@@ -142,17 +157,11 @@ export default function ResultsPage() {
 
       <div className="sep" />
 
-      {attempts.length > 0 && (
-        <>
-          <h2>Ranking</h2>
-          {attempts.map((a, k) => (
-            <p key={k} className="miss">
-              {k + 1}. {a.name} · {formatScore(a.score)}/{data.length}
-              {k === 0 ? ' 👑 knows you best' : ''}
-            </p>
-          ))}
-        </>
-      )}
+      <h2>Send it to more people</h2>
+      <p className="note">Your quiz link — share it any time, this page doesn't change it:</p>
+      <input readOnly value={link} onFocus={(e) => e.target.select()} aria-label="Your quiz link" />
+      <ShareRow text={pickMakerCaption(makerName)} link={link} />
+
     </>
   );
 }

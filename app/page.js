@@ -28,6 +28,18 @@ export default function HomePage() {
   const [i, setI] = useState(0);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  function copyLink() {
+    const url = `${window.location.origin}/q/${result.id}`;
+    navigator.clipboard.writeText(url).then(
+      () => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1800);
+      },
+      () => {} // the link is in the box above, selectable by hand
+    );
+  }
 
   function start() {
     if (!name.trim()) return;
@@ -87,9 +99,10 @@ export default function HomePage() {
   if (step === 'setup') {
     return (
       <>
-        <Hero />
         <h1>How well do they really know you?</h1>
         <p>Answer about yourself. Send the link. They guess. Everyone sees the score.</p>
+
+        <Hero />
 
         <a className="returning" href="/recover">
           Made a quiz before? <span>Find your results</span>
@@ -101,6 +114,7 @@ export default function HomePage() {
             <button
               key={a}
               className={'chip' + (a === audience ? ' on' : '')}
+              aria-pressed={a === audience}
               onClick={() => setAudience(a)}
             >
               {AUDIENCE_EMOJI[a]} {a}
@@ -114,6 +128,7 @@ export default function HomePage() {
             <button
               key={l}
               className={'chip' + (l === length ? ' on' : '')}
+              aria-pressed={l === length}
               onClick={() => setLength(l)}
             >
               {l}
@@ -129,7 +144,7 @@ export default function HomePage() {
         />
         <input
           type="email"
-          placeholder="Email (optional, so you can recover your results link later)"
+          placeholder="Email (optional, to recover your link)"
           maxLength={200}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -191,7 +206,10 @@ export default function HomePage() {
     <>
       <h1>Your quiz is ready</h1>
       <p>Let people prove it — post the link and tag the ones who think they know you.</p>
-      <input readOnly value={link} onFocus={(e) => e.target.select()} />
+      <input readOnly value={link} onFocus={(e) => e.target.select()} aria-label="Your quiz link" />
+      <button className="btn" onClick={copyLink}>
+        {copied ? 'Copied' : 'Copy link'}
+      </button>
       <ShareRow text={post} link={link} />
       <div className="sep" />
       <p>

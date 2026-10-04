@@ -57,6 +57,10 @@ export async function GET(request, { params }) {
   }
 
   const length = quiz.question_ids.length;
+  // Out of the scored questions only — talking-point questions never count
+  // toward a score (see attempts/route.js), so they can't count toward the
+  // denominator either.
+  const total = quiz.question_ids.filter((qid) => !QUESTIONS[qid]?.topic).length;
 
   // Full insights (rating, what people get right/wrong) are a $1.99/quiz
   // unlock via Stripe — see /api/checkout. Everyone with the owner token can
@@ -164,6 +168,7 @@ export async function GET(request, { params }) {
     makerName: quiz.maker_name,
     audience: quiz.audience,
     length,
+    total,
     createdAt: quiz.created_at,
     attempts: attempts.map((a) => ({
       name: a.guesser_name,

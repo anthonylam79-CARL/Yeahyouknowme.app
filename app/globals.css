@@ -1,12 +1,30 @@
+/*
+  Yeah You Know Me — visual system
+
+  Idea: every quiz ends in a receipt — a verdict, a score, and a tick or a
+  cross for every question. The look follows from that: chunky sticker-like
+  tiles that physically press down when tapped (interactive things only),
+  flat outlined surfaces for everything else, and one loud moment — the
+  plum "stage" where the verdict lands. Brand colors are unchanged.
+
+  Type: Bricolage Grotesque only. Body text uses the normal width; scores,
+  verdicts and the headline use its condensed width (font-stretch) so big
+  numbers feel like a stamp rather than a UI label.
+*/
+
 :root {
   --bg: #fff1f6;
   --fg: #2b1b3d;
   --card: #fff;
-  --pink: #f2336d;
+  --pink: #f2336d; /* fills and decoration */
+  --btn: #d81b5b; /* pink behind white text — passes AA at body size */
   --yel: #ffd23f;
-  --mut: #7a6a8c;
-  --ok: #0f9d78;
+  --mut: #6b5a80;
+  --ok: #0b8a69;
   --bad: #d6334b;
+  --ink: #2b1b3d; /* outlines and hard shadows */
+  --stage: #2b1b3d;
+  --stage-fg: #fff0f6;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -17,6 +35,8 @@
     --mut: #b7a6cc;
     --ok: #3ddcae;
     --bad: #ff6b81;
+    --ink: #8a6bb8;
+    --stage: #130a22;
   }
 }
 
@@ -36,22 +56,24 @@ body {
 .wrap {
   max-width: 520px;
   margin: 0 auto;
-  padding: 28px 20px 48px;
+  padding: 28px 20px 56px;
 }
 
 h1 {
-  font-size: clamp(2.1rem, 9vw, 3.2rem);
-  line-height: 1;
-  letter-spacing: -0.03em;
+  font-size: clamp(2.5rem, 12vw, 3.8rem);
+  line-height: 0.95;
+  letter-spacing: -0.025em;
   font-weight: 800;
+  font-stretch: 75%;
   margin: 0 0 14px;
 }
 
 h2 {
-  font-size: 1.5rem;
-  line-height: 1.15;
-  margin: 8px 0 18px;
+  font-size: 1.6rem;
+  line-height: 1.12;
+  margin: 8px 0 20px;
   font-weight: 800;
+  letter-spacing: -0.01em;
 }
 
 p {
@@ -59,33 +81,56 @@ p {
   color: var(--mut);
 }
 
+small {
+  color: var(--mut);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ───────── inputs ───────── */
+
 input {
   width: 100%;
   font: inherit;
   padding: 14px 16px;
   border-radius: 14px;
-  border: 2px solid color-mix(in srgb, var(--fg) 18%, transparent);
+  border: 2px solid var(--ink);
   background: var(--card);
   color: var(--fg);
   margin-bottom: 12px;
 }
 
-input:focus,
-button:focus-visible {
-  outline: 3px solid var(--yel);
-  outline-offset: 2px;
+input:focus-visible,
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible {
+  outline: 3px solid var(--fg);
+  outline-offset: 3px;
 }
+
+/* ───────── buttons: tiles that press down ───────── */
 
 .btn {
   font: inherit;
   font-weight: 700;
-  border: 0;
+  border: 2px solid var(--ink);
   border-radius: 999px;
-  padding: 14px 24px;
-  background: var(--pink);
+  padding: 13px 24px;
+  background: var(--btn);
   color: #fff;
   cursor: pointer;
-  margin: 0 8px 10px 0;
+  margin: 0 8px 14px 0;
+  box-shadow: 0 4px 0 var(--ink);
+  transition: transform 80ms, box-shadow 80ms;
+  display: inline-block;
+  text-decoration: none;
 }
 
 .btn.alt {
@@ -94,118 +139,113 @@ button:focus-visible {
 }
 
 .btn.small {
-  padding: 9px 15px;
+  padding: 8px 14px;
   font-size: 0.9rem;
+  margin-bottom: 12px;
+  box-shadow: 0 3px 0 var(--ink);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--ink);
+}
+
+.btn.small:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--ink);
 }
 
 .btn:disabled {
-  opacity: 0.4;
+  opacity: 0.45;
   cursor: default;
+  box-shadow: none;
+  transform: translateY(3px);
 }
+
+.link-btn {
+  font: inherit;
+  font-weight: 600;
+  background: none;
+  border: 0;
+  padding: 6px 0;
+  color: var(--mut);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.shares {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.shares .btn.alt {
+  background: var(--card);
+  color: var(--fg);
+  box-shadow: 0 2px 0 var(--ink);
+  margin-right: 6px;
+}
+
+/* ───────── answer tiles ───────── */
 
 .opt {
   display: block;
   width: 100%;
+  min-height: 56px;
   text-align: left;
   font: inherit;
-  padding: 14px 16px;
-  margin-bottom: 10px;
-  border-radius: 14px;
-  border: 2px solid color-mix(in srgb, var(--fg) 18%, transparent);
+  font-size: 1.05rem;
+  font-weight: 600;
+  padding: 14px 18px;
+  margin-bottom: 14px;
+  border-radius: 16px;
+  border: 2px solid var(--ink);
   background: var(--card);
   color: var(--fg);
   cursor: pointer;
+  box-shadow: 0 4px 0 var(--ink);
+  transition: transform 80ms, box-shadow 80ms, background 120ms;
 }
 
-.opt.ok {
-  border-color: var(--ok);
-  background: color-mix(in srgb, var(--ok) 18%, var(--card));
+.opt:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--ink);
 }
 
-.opt.bad {
-  border-color: var(--bad);
-  background: color-mix(in srgb, var(--bad) 15%, var(--card));
+.opt:disabled {
+  cursor: default;
+}
+
+/* "Locked in": pressed down and filled. Not a right/wrong signal. */
+.opt.picked {
+  background: var(--btn);
+  color: #fff;
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--ink);
+}
+
+@media (hover: hover) {
+  .opt:hover:not(:disabled):not(.picked) {
+    background: color-mix(in srgb, var(--yel) 35%, var(--card));
+  }
 }
 
 .bar {
-  height: 6px;
-  border-radius: 9px;
-  background: color-mix(in srgb, var(--fg) 14%, transparent);
-  margin-bottom: 22px;
+  height: 12px;
+  border-radius: 99px;
+  border: 2px solid var(--ink);
+  background: var(--card);
+  margin-bottom: 24px;
+  overflow: hidden;
 }
 
 .bar i {
   display: block;
   height: 100%;
-  border-radius: 9px;
   background: var(--pink);
-}
-
-.score {
-  background: var(--yel);
-  color: #2b1b3d;
-  border-radius: 24px;
-  padding: 26px 22px;
-  margin-bottom: 20px;
-}
-
-.score b {
-  display: block;
-  font-size: 4.4rem;
-  line-height: 1;
-  font-weight: 800;
-  letter-spacing: -0.04em;
-}
-
-.score span {
-  font-size: 1.4rem;
-  font-weight: 800;
-}
-
-.miss {
-  font-size: 0.95rem;
-  color: var(--mut);
-  margin: 0 0 8px;
-}
-
-.sep {
-  height: 1px;
-  background: color-mix(in srgb, var(--fg) 16%, transparent);
-  margin: 26px 0;
-}
-
-small {
-  color: var(--mut);
-}
-
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 6px 0 16px;
-}
-
-.chip {
-  font: inherit;
-  font-size: 0.9rem;
-  font-weight: 700;
-  padding: 8px 14px;
-  border-radius: 999px;
-  border: 2px solid color-mix(in srgb, var(--fg) 18%, transparent);
-  background: var(--card);
-  color: var(--fg);
-  cursor: pointer;
-}
-
-.chip.on {
-  background: var(--pink);
-  border-color: var(--pink);
-  color: #fff;
-}
-
-.note {
-  font-size: 0.85rem;
-  margin-top: 10px;
+  transition: width 300ms ease-out;
 }
 
 .scale {
@@ -215,25 +255,38 @@ small {
 .scale-row {
   display: flex;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .scale-btn {
   flex: 1;
   font: inherit;
   font-weight: 800;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   padding: 16px 0;
   border-radius: 14px;
-  border: 2px solid color-mix(in srgb, var(--fg) 18%, transparent);
+  border: 2px solid var(--ink);
   background: var(--card);
   color: var(--fg);
   cursor: pointer;
+  box-shadow: 0 4px 0 var(--ink);
+  transition: transform 80ms, box-shadow 80ms;
 }
 
-.scale-btn.ok {
-  border-color: var(--ok);
-  background: color-mix(in srgb, var(--ok) 18%, var(--card));
+.scale-btn:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--ink);
+}
+
+.scale-btn:disabled {
+  cursor: default;
+}
+
+.scale-btn.picked {
+  background: var(--btn);
+  color: #fff;
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--ink);
 }
 
 .scale-labels {
@@ -249,21 +302,51 @@ small {
   text-align: right;
 }
 
-.paywall {
-  background: var(--card);
-  border: 2px dashed color-mix(in srgb, var(--fg) 20%, transparent);
-  border-radius: 24px;
-  padding: 22px;
-  margin-bottom: 20px;
+/* ───────── chips ───────── */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 8px 0 18px;
 }
 
-.paywall .btn {
-  margin-top: 12px;
+.chip {
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 9px 16px;
+  border-radius: 999px;
+  border: 2px solid var(--ink);
+  background: var(--card);
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.chip.on {
+  background: var(--yel);
+  color: #2b1b3d;
+  box-shadow: 0 3px 0 var(--ink);
+  transform: translateY(-1px);
+}
+
+/* ───────── misc text bits ───────── */
+
+.note {
+  font-size: 0.85rem;
+  margin-top: 10px;
 }
 
 .error {
   color: var(--bad);
   font-weight: 700;
+}
+
+.sep {
+  height: 2px;
+  background: color-mix(in srgb, var(--ink) 35%, transparent);
+  margin: 28px 0;
+  border-radius: 2px;
 }
 
 .returning {
@@ -276,49 +359,381 @@ small {
 }
 
 .returning span {
-  color: var(--pink);
+  color: var(--btn);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
-.hero-art {
-  width: 230px;
-  max-width: 62%;
-  height: auto;
-  display: block;
-  margin: 4px 0 2px;
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .returning span {
+    color: var(--yel);
+  }
 }
 
-.hero-card {
-  transform: rotate(var(--rot));
-  transform-origin: 0px 0px;
+.paywall {
+  background: var(--card);
+  border: 2px solid var(--ink);
+  border-radius: 22px;
+  padding: 22px;
+  margin-bottom: 20px;
 }
+
+.paywall .btn {
+  margin-top: 12px;
+}
+
+/* Yellow summary card (maker's open-book rating). */
+.score {
+  background: var(--yel);
+  color: #2b1b3d;
+  border: 2px solid var(--ink);
+  border-radius: 24px;
+  padding: 24px 22px;
+  margin-bottom: 20px;
+  box-shadow: 0 5px 0 var(--ink);
+}
+
+.score b {
+  display: block;
+  font-size: 5rem;
+  line-height: 0.95;
+  font-weight: 800;
+  font-stretch: 75%;
+  letter-spacing: -0.03em;
+}
+
+.score span {
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+/* ───────── landing: the sample receipt ───────── */
+
+.ticket {
+  max-width: 400px;
+  margin: 4px 0 22px;
+  background: var(--card);
+  border: 2px solid var(--ink);
+  border-radius: 20px;
+  box-shadow: 0 5px 0 var(--ink);
+  overflow: hidden;
+  color: var(--fg);
+}
+
+.ticket-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 12px 16px 6px;
+  font-weight: 700;
+}
+
+.ticket-row {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  padding: 5px 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.ticket-row i,
+.receipt-row i {
+  font-family: system-ui, 'Segoe UI Symbol', sans-serif;
+  line-height: 1;
+}
+
+.ticket-row i {
+  font-style: normal;
+  font-weight: 800;
+  flex: none;
+  width: 1.1em;
+}
+
+.ticket-row span {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.ticket-row.hit i {
+  color: var(--ok);
+}
+
+.ticket-row.missed i {
+  color: var(--bad);
+}
+
+.ticket-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+  padding: 12px 16px 14px;
+  border-top: 2px dashed var(--ink);
+}
+
+.ticket-score {
+  font-size: 2.7rem;
+  line-height: 1;
+  font-weight: 800;
+  font-stretch: 75%;
+  letter-spacing: -0.03em;
+}
+
+.ticket-score span {
+  font-size: 0.5em;
+  color: var(--mut);
+}
+
+.ticket .stamp {
+  font-size: 1.7rem;
+  padding: 6px 12px 8px;
+  white-space: nowrap;
+}
+
+/* ───────── the verdict stage ───────── */
+
+.stage {
+  background: var(--stage);
+  color: var(--stage-fg);
+  border: 2px solid var(--ink);
+  border-radius: 28px;
+  padding: 24px 22px 26px;
+  margin: 0 0 24px;
+  overflow: hidden;
+}
+
+.stage small,
+.stage-vs {
+  color: color-mix(in srgb, var(--stage-fg) 72%, transparent);
+  font-weight: 600;
+  font-size: 1rem;
+  display: block;
+}
+
+.dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 16px 0 18px;
+}
+
+.dot {
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  border: 2px solid var(--yel);
+}
+
+.dot.hit {
+  background: var(--yel);
+}
+
+.stage-num {
+  display: block;
+  font-size: clamp(6rem, 34vw, 9rem);
+  line-height: 0.85;
+  font-weight: 800;
+  font-stretch: 75%;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  color: var(--yel);
+  margin: 4px 0 18px;
+}
+
+.stage-num span {
+  font-size: 0.38em;
+  letter-spacing: -0.02em;
+  color: color-mix(in srgb, var(--stage-fg) 62%, transparent);
+}
+
+.stamp {
+  display: inline-block;
+  padding: 8px 16px 10px;
+  border-radius: 12px;
+  background: var(--pink);
+  color: #fff;
+  font-size: clamp(2.2rem, 11vw, 3.1rem);
+  line-height: 1;
+  font-weight: 800;
+  font-stretch: 75%;
+  letter-spacing: -0.02em;
+  transform: rotate(-4deg);
+  transform-origin: left center;
+}
+
+.stage-line {
+  margin: 18px 0 6px;
+  color: var(--stage-fg);
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.stage-rank {
+  margin: 0;
+  color: color-mix(in srgb, var(--stage-fg) 72%, transparent);
+  font-weight: 600;
+}
+
+/* Per-question receipt under the stage. */
+.receipt {
+  margin: 0 0 8px;
+}
+
+.receipt summary {
+  font-weight: 800;
+  font-size: 1.1rem;
+  cursor: pointer;
+  margin-bottom: 12px;
+}
+
+.receipt-row {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr;
+  gap: 8px;
+  padding: 7px 0;
+  border-bottom: 1px dashed color-mix(in srgb, var(--ink) 45%, transparent);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.receipt-row i {
+  font-style: normal;
+  font-weight: 800;
+}
+
+.receipt-row.hit i {
+  color: var(--ok);
+}
+
+.receipt-row.missed i {
+  color: var(--bad);
+}
+
+/* ───────── maker's leaderboard ───────── */
+
+.board {
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+}
+
+.board li {
+  display: grid;
+  grid-template-columns: 2.4rem 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  border: 2px solid var(--ink);
+  border-radius: 16px;
+  background: var(--card);
+}
+
+.board li.top {
+  background: var(--yel);
+  color: #2b1b3d;
+  box-shadow: 0 4px 0 var(--ink);
+}
+
+.board-rank {
+  font-size: 1.7rem;
+  line-height: 1;
+  font-weight: 800;
+  font-stretch: 75%;
+}
+
+.board-name {
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.board-name small {
+  display: block;
+  font-weight: 600;
+  color: inherit;
+  opacity: 0.75;
+}
+
+.board-score {
+  font-size: 1.5rem;
+  font-weight: 800;
+  font-stretch: 75%;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ───────── motion: only on landing + the verdict, never on load of
+   ordinary screens. Everything below is skipped under reduced motion,
+   and the elements are fully visible without it. ───────── */
 
 @media (prefers-reduced-motion: no-preference) {
-  .hero-card {
-    animation: hero-fan 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  .ticket-row {
+    animation: tick-in 260ms ease-out both;
+    animation-delay: var(--d, 0s);
   }
 
-  .hero-card-1 {
-    animation-delay: 0s;
+  .ticket .stamp {
+    animation: stamp-in 420ms cubic-bezier(0.2, 1.5, 0.4, 1) both;
+    animation-delay: 0.95s;
   }
 
-  .hero-card-2 {
-    animation-delay: 0.08s;
+  .dot {
+    animation: dot-in 240ms cubic-bezier(0.2, 1.6, 0.4, 1) both;
+    animation-delay: var(--d, 0s);
   }
 
-  .hero-card-3 {
-    animation-delay: 0.16s;
+  .stage .stamp {
+    animation: stamp-in 420ms cubic-bezier(0.2, 1.5, 0.4, 1) both;
+    animation-delay: var(--stamp-d, 0s);
+  }
+
+  .stage-late {
+    animation: fade-in 400ms ease-out both;
+    animation-delay: var(--stamp-d, 0s);
   }
 }
 
-@keyframes hero-fan {
+@keyframes tick-in {
   from {
-    transform: rotate(0deg) scale(0.85);
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dot-in {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes stamp-in {
+  from {
+    opacity: 0;
+    transform: scale(2.3) rotate(-14deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(-4deg);
+  }
+}
+
+@keyframes fade-in {
+  from {
     opacity: 0;
   }
   to {
-    transform: rotate(var(--rot)) scale(1);
     opacity: 1;
   }
 }
