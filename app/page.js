@@ -144,11 +144,14 @@ export default function HomePage() {
         />
         <input
           type="email"
-          placeholder="Email (optional, to recover your link)"
+          placeholder="Email (optional)"
           maxLength={200}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
+        <small>
+          Optional. We'll email your links, and let you know when people take your quiz. Stop any time.
+        </small>
         <button className="btn" onClick={start}>
           Make my quiz
         </button>

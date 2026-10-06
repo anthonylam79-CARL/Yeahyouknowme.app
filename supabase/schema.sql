@@ -82,3 +82,6 @@ create or replace view bracket_stats as
 
 -- Not exposed to anon directly; the /api/percentile route (service role)
 -- reads this and enforces the 100-attempt minimum before returning a number.
+
+-- "Someone took your quiz" emails (see supabase/migrations/20261005_notify_on_attempt.sql).
+alter table quizzes add column if not exists notify_on_attempt boolean not null default true;

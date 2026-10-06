@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { generateQuizId, generateOwnerToken, hashToken } from '@/lib/ids';
 import { validateNewQuiz } from '@/lib/validate';
 import { sendEmail } from '@/lib/resend';
+import { escapeHtml, cleanName } from '@/lib/text';
 
 // Fire-and-forget confirmation email — both links the maker might need
 // later, never their answers (they just picked those, it's not new
@@ -17,9 +18,10 @@ async function sendConfirmationEmail({ email, makerName, id, ownerToken, origin 
       to: email,
       subject: 'Your Yeah You Know Me quiz is ready',
       html: `
-        <p>Hey ${makerName} — your quiz is live. Keep this email, it has both links you'll need.</p>
+        <p>Hey ${escapeHtml(cleanName(makerName))} — your quiz is live. Keep this email, it has both links you'll need.</p>
         <p><strong>Share this one</strong> so people can take your quiz:<br>
           <a href="${shareLink}">${shareLink}</a></p>
+        <p style="color:#777;font-size:12px">We'll also email you when people take your quiz (at most once per burst). Every email has a link to stop them.</p>
         <p><strong>Bookmark this one</strong> — it's your private results page (only you should have it):<br>
           <a href="${resultsLink}">${resultsLink}</a></p>
       `,
