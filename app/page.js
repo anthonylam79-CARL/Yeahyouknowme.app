@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { AUDIENCES, QUESTIONS } from '@/lib/questions';
-import { pickQuestionIds } from '@/lib/pick';
+import { pickQuestionIds, swapQuestionId } from '@/lib/pick';
 import ShareRow from '@/components/ShareRow';
 import ScaleInput from '@/components/ScaleInput';
 import Hero from '@/components/Hero';
@@ -51,10 +51,9 @@ export default function HomePage() {
   }
 
   function swap() {
-    const ids = pickQuestionIds(audience, category, LENGTHS[length]);
-    // keep already-answered ones, replace the current and remaining
-    const next = questionIds.slice(0, i).concat(ids.filter((id) => !questionIds.slice(0, i).includes(id)));
-    setQuestionIds(next.slice(0, LENGTHS[length]));
+    // Replace only the question on screen with a similar one, so the quiz's
+    // mix (including its personality questions) stays intact.
+    setQuestionIds(swapQuestionId(audience, category, questionIds, i));
   }
 
   async function pick(optionIndex) {
@@ -100,7 +99,10 @@ export default function HomePage() {
     return (
       <>
         <h1>How well do they really know you?</h1>
-        <p>Answer about yourself. Send the link. They guess. Everyone sees the score.</p>
+        <p>
+          Answer about yourself. Send the link. They guess. Everyone sees the score, and you see how
+          you rate yourself against how people actually see you.
+        </p>
 
         <Hero />
 
@@ -152,6 +154,49 @@ export default function HomePage() {
         <button className="btn" onClick={start}>
           Make my quiz
         </button>
+
+        <div className="sep" />
+        <h2>More than a score</h2>
+        <p>
+          A few questions in every quiz come from personality psychology. When people take it, you
+          get a report on how you come across, not just who got the most right.
+        </p>
+        <div className="feature">
+          <strong>Your blind spots</strong>
+          <p>Where the people who know you see you differently from how you see yourself.</p>
+        </div>
+        <div className="feature">
+          <strong>Your tendencies</strong>
+          <p>
+            Curiosity, organization, social energy, warmth and emotional intensity, you versus
+            them.
+          </p>
+        </div>
+        <div className="feature">
+          <strong>Closeness and conflict</strong>
+          <p>How you handle space and disagreements, and how it reads from the outside.</p>
+        </div>
+        <div className="feature">
+          <strong>Who knows you best</strong>
+          <p>Broken down by area, so you can see who gets which side of you.</p>
+        </div>
+        <div className="paywall">
+          <p className="note" style={{ marginTop: 0 }}>
+            Example result
+          </p>
+          <p style={{ marginBottom: 8 }}>
+            <strong>Blind spot.</strong> You said you bring a lot of energy into a room (5/5). The
+            people who took your quiz guessed 3/5.
+          </p>
+          <p style={{ marginBottom: 0 }}>
+            <strong>Steady on conflict.</strong> You said you work things out together, and so did
+            everyone else.
+          </p>
+        </div>
+        <p className="note">
+          The score and ranking are free. The full report unlocks for $1.99 per quiz. It's a
+          conversation starter built from a handful of questions, not a personality test.
+        </p>
       </>
     );
   }

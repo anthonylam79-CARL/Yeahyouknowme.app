@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { hashToken } from '@/lib/ids';
-import { QUESTIONS } from '@/lib/questions';
+import { QUESTIONS, isPsych } from '@/lib/questions';
+import { buildPsychInsights } from '@/lib/insights';
 
 const RATING_LABELS = [
   { min: 85, label: 'An open book' },
@@ -77,9 +78,14 @@ export async function GET(request, { params }) {
     const scoreableIdx = quiz.question_ids
       .map((_, i) => i)
       .filter((i) => !QUESTIONS[quiz.question_ids[i]]?.topic);
+    // Psychology-tagged questions get their own richer report (psych, below);
+    // only the remaining unscored ones stay as plain talking points.
     const topicIdx = quiz.question_ids
       .map((_, i) => i)
-      .filter((i) => QUESTIONS[quiz.question_ids[i]]?.topic);
+      .filter((i) => {
+        const q = QUESTIONS[quiz.question_ids[i]];
+        return q?.topic && !isPsych(q);
+      });
 
     const rate = {};
     scoreableIdx.forEach((i) => {
@@ -159,6 +165,16 @@ export async function GET(request, { params }) {
       mostGuessed: hi !== undefined ? describe(hi) : null,
       leastGuessed: hi !== undefined && hi !== lo ? describe(lo) : null,
       talkingPoints: topicIdx.map(describeTopic),
+      // Personality / closeness / conflict report: self vs. how others see
+      // the maker. Null when the quiz has too few tagged questions (e.g. an
+      // older quiz). Attempts are put in the order they were made so ties on
+      // "who knows you best" go to whoever answered first.
+      psych: buildPsychInsights({
+        questionIds: quiz.question_ids,
+        answers: quiz.answers,
+        audience: quiz.audience,
+        attempts: [...attempts].sort((a, b) => new Date(a.created_at) - new Date(b.created_at)),
+      }),
       basedOn: attempts.length,
     };
   }

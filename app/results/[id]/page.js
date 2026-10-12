@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import ShareRow from '@/components/ShareRow';
+import PsychReport from '@/components/PsychReport';
 import { formatScore } from '@/lib/format';
 import { verdictFor } from '@/lib/verdict';
 import { pickMakerCaption } from '@/lib/captions';
@@ -105,6 +106,11 @@ export default function ResultsPage() {
           </div>
           <p className="note">Based on {insights.basedOn} {insights.basedOn === 1 ? 'person' : 'people'}.</p>
 
+          <PsychReport psych={insights.psych} />
+
+          <div className="sep" />
+          <h2>The scored questions</h2>
+
           <p>
             <strong>What people get right:</strong> "{insights.mostGuessed.prompt}" —{' '}
             {insights.mostGuessed.percentCorrect}% guessed "{insights.mostGuessed.makerAnswer}" correctly.
@@ -143,8 +149,9 @@ export default function ResultsPage() {
       ) : insightsLocked ? (
         <div className="paywall">
           <p>
-            <strong>Your full insights are ready</strong> — open-book rating, what people get right, and
-            what trips them up.
+            <strong>Your full insights are ready.</strong> See how you rate yourself against how people
+            actually see you: personality tendencies, closeness and conflict style, your blind spots,
+            who knows you best in each area, plus your open-book rating and what trips people up.
           </p>
           <button className="btn" onClick={unlock} disabled={unlocking}>
             {unlocking ? 'Redirecting…' : 'Unlock for $1.99'}

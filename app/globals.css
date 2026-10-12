@@ -737,3 +737,87 @@ summary:focus-visible {
     opacity: 1;
   }
 }
+
+/* Psychology report (components/PsychReport.js) */
+.legend {
+  display: flex;
+  gap: 18px;
+  font-size: 0.85rem;
+  color: var(--mut);
+  margin: 4px 0 14px;
+}
+
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.trait {
+  margin-bottom: 22px;
+}
+
+.trait-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.trait-track {
+  position: relative;
+  height: 6px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--fg) 14%, transparent);
+  margin: 10px 8px 12px;
+}
+
+.trait-track .dot {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.dot {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--card);
+}
+
+.dot-you {
+  background: var(--pink);
+}
+
+.dot-others {
+  background: var(--yel);
+  border-color: var(--fg);
+}
+
+.trait-ends {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.trait-line {
+  margin: 6px 0 0;
+  color: var(--fg);
+}
+
+.gap {
+  margin-bottom: 16px;
+}
+
+.feature {
+  margin-bottom: 14px;
+}
+
+.feature strong {
+  display: block;
+}
+
+.feature p {
+  margin: 2px 0 0;
+}
