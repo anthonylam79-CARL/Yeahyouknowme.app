@@ -382,6 +382,11 @@ summary:focus-visible {
   margin-top: 12px;
 }
 
+.curiosity-prompts { list-style: none; padding: 0; margin: 20px 0; }
+.curiosity-prompts li { padding: 14px 0; border-top: 1px solid var(--ink); }
+.curiosity-prompts strong, .curiosity-prompts span { display: block; }
+.curiosity-prompts span { margin-top: 5px; font-size: .9em; }
+
 /* Yellow summary card (maker's open-book rating). */
 .score {
   background: var(--yel);
