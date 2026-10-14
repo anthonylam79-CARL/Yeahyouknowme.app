@@ -1,7 +1,8 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, after } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { validateAttempt } from '@/lib/validate';
 import { QUESTIONS } from '@/lib/questions';
+import { notifyMakerOfAttempt } from '@/lib/notifyMaker';
 
 // A "hit" (used for the maker's per-question percent-correct insight) is an
 // exact match on multiple choice, or landing within 1 point on a scale
@@ -113,6 +114,8 @@ export async function POST(request, { params }) {
   const scoreableTotal = quiz.question_ids.filter(
     (qid) => !QUESTIONS[qid]?.topic
   ).length;
+
+  after(() => notifyMakerOfAttempt({ quizId: id, attemptId: inserted.id, guesserName: value.guesserName, score, total: scoreableTotal, origin: 'https://www.yeahyouknowme.app' }));
 
   return NextResponse.json(
     {
