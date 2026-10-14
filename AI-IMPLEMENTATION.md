@@ -5,15 +5,16 @@ round-two questions. Suggestions do not modify the quiz or score. No names,
 emails, demographics or owner tokens are sent to the model; only aggregate
 answer counts. The request button explains this before sending data.
 
-Current status: code built and tested locally; Supabase storage and reservation
-function installed. Not deployed or enabled. No live model request or charge.
+Current status: deployed and AI enabled on production; Supabase storage and
+reservation function installed. Live synthetic generation succeeded. Report
+evidence explicitly separates maker answers from others’ guesses.
 
 Activation: publish source, set AI_REPORTS_ENABLED=true and
 NEXT_PUBLIC_AI_REPORTS_ENABLED=true, use openai/gpt-5-mini through Vercel AI
 Gateway OIDC, and verify one synthetic paid quiz end-to-end. Confirm the team's
 Gateway balance first. No credit purchase or automatic top-up is configured.
 
-Limits: one generation per quiz per 30 minutes; 1,000 generation reservations
+Limits: one generation per quiz per 30 minutes; 500 generation reservations
 per UTC calendar month site-wide; saved output reused for identical aggregate
 answers; retries disabled; 2,000 output-token limit including reasoning; evidence
 limited to 22,000 characters. Failures also consume a reservation to contain
