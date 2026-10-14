@@ -30,7 +30,7 @@ export async function GET(request, { params }) {
 
   const { data: quiz, error: quizError } = await db
     .from('quizzes')
-    .select('id, maker_name, audience, question_ids, answers, owner_token_hash, is_premium, created_at')
+    .select('id, maker_name, audience, question_ids, answers, owner_token_hash, is_premium, created_at, compatibility_available')
     .eq('id', id)
     .maybeSingle();
 
@@ -47,7 +47,7 @@ export async function GET(request, { params }) {
 
   const { data: attempts, error: attemptsError } = await db
     .from('attempts')
-    .select('id, guesser_name, score, hits, guesses, age_bracket, gender, created_at')
+    .select('id, guesser_name, score, hits, guesses, age_bracket, gender, created_at, compatibility')
     .eq('quiz_id', id)
     .order('score', { ascending: false })
     .order('created_at', { ascending: true });
@@ -181,6 +181,7 @@ export async function GET(request, { params }) {
 
   return NextResponse.json({
     id: quiz.id,
+    compatibilityAvailable: quiz.compatibility_available,
     makerName: quiz.maker_name,
     audience: quiz.audience,
     length,
@@ -188,6 +189,7 @@ export async function GET(request, { params }) {
     createdAt: quiz.created_at,
     attempts: attempts.map((a) => ({
       name: a.guesser_name,
+      compatibility: quiz.compatibility_available ? a.compatibility : null,
       score: a.score,
       createdAt: a.created_at,
     })),
