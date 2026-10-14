@@ -37,10 +37,9 @@ export async function POST(request, { params }) {
     if (prompt.length > 22000) throw new Error('Evidence too large');
     const result = await generateText({
       model: process.env.AI_GATEWAY_MODEL || 'openai/gpt-5-mini',
-      system: REPORT_SYSTEM, prompt, maxOutputTokens: 2000, maxRetries: 0,
+      system: REPORT_SYSTEM, prompt, maxOutputTokens: 2000, reasoning: 'minimal', maxRetries: 0,
       abortSignal: AbortSignal.timeout(45000),
       output: Output.object({ schema: reportSchema }),
-      providerOptions: { openai: { reasoningEffort: 'minimal' } },
     });
     const report = reportSchema.parse(result.output);
     const { error: saveError } = await db.from('ai_quiz_reports').update({ report, based_on: attempts.length }).eq('quiz_id', id).eq('fingerprint', fingerprint);
