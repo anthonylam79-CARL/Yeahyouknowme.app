@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import ShareRow from '@/components/ShareRow';
 import PsychReport from '@/components/PsychReport';
+import AIReport from '@/components/AIReport';
 import { formatScore } from '@/lib/format';
 import { verdictFor } from '@/lib/verdict';
 import { pickMakerCaption } from '@/lib/captions';
@@ -107,6 +108,7 @@ export default function ResultsPage() {
           <p className="note">Based on {insights.basedOn} {insights.basedOn === 1 ? 'person' : 'people'}.</p>
 
           <PsychReport psych={insights.psych} />
+          {process.env.NEXT_PUBLIC_AI_REPORTS_ENABLED === 'true' && <AIReport id={id} token={token} />}
 
           <div className="sep" />
           <h2>The scored questions</h2>
