@@ -148,18 +148,27 @@ export default function ResultsPage() {
         </>
       ) : insightsLocked ? (
         <div className="paywall">
-          <p>
-            <strong>Your full insights are ready.</strong> See how you rate yourself against how people
-            actually see you: personality tendencies, closeness and conflict style, your blind spots,
-            who knows you best in each area, plus your open-book rating and what trips people up.
-          </p>
+          <p className="note" style={{ marginTop: 0 }}>Your private report · {attempts.length} {attempts.length === 1 ? 'response' : 'responses'} so far</p>
+          <h2 style={{ marginTop: 0 }}>Their score is only half the story.</h2>
+          <p>They’ve made their guesses. Curious what those answers say about how well they know you?</p>
+          <ul className="curiosity-prompts">
+            <li><strong>What do people get wrong about you?</strong><span>Reveal the scored question that trips them up most.</span></li>
+            <li><strong>Which answer do they get right most often?</strong><span>Find the part of you that comes through clearly.</span></li>
+            <li><strong>Are you an open book—or harder to read than you think?</strong><span>See your open-book rating, based on their answers.</span></li>
+          </ul>
+          <p className="note">Based on the questions in your quiz. Personality comparisons appear after 3 people respond; they may show agreement as well as differences.</p>
           <button className="btn" onClick={unlock} disabled={unlocking}>
-            {unlocking ? 'Redirecting…' : 'Unlock for $1.99'}
+            {unlocking ? 'Redirecting…' : 'Reveal my full report — US$1.99'}
           </button>
+          <p className="note">One payment for this quiz. No subscription. Applicable tax is shown at checkout. Your report updates as more people respond.</p>
           {unlockError && <p className="note">{unlockError}</p>}
         </div>
       ) : (
-        <p>Nobody's taken your quiz yet. Share the link to get your first result.</p>
+        <div className="paywall">
+          <h2 style={{ marginTop: 0 }}>Think they know you? Find out.</h2>
+          <p>Which answer will surprise them? What will they get wrong about you? Send your quiz to your {data.audience === 'Partner' ? 'partner' : data.audience === 'BFF' ? 'best friend' : 'family'} to get your first result.</p>
+          <p className="note">Scores and rankings are free. Once someone responds, you can unlock the full report for US$1.99 plus applicable tax.</p>
+        </div>
       )}
 
       <div className="sep" />
