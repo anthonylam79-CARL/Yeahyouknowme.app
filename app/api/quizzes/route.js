@@ -60,6 +60,7 @@ export async function POST(request) {
       answers: value.answers,
       owner_token_hash: ownerTokenHash,
       maker_email: value.email,
+      notify_on_attempt: Boolean(value.email && body.notifyOnAttempt === true),
     });
 
     if (!error) {
