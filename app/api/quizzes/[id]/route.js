@@ -12,7 +12,7 @@ export async function GET(_request, { params }) {
 
   const { data, error } = await db
     .from('quizzes')
-    .select('id, maker_name, audience, question_ids, created_at')
+    .select('id, maker_name, audience, question_ids, created_at, compatibility_available')
     .eq('id', id)
     .maybeSingle();
 
@@ -32,5 +32,6 @@ export async function GET(_request, { params }) {
     audience: data.audience,
     questions, // [{ prompt, options: [4 strings] }], no correct answer included
     length: questions.length,
+    compatibilityAvailable: data.compatibility_available,
   });
 }
