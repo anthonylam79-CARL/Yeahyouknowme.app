@@ -1,4 +1,5 @@
 'use client';
+import MakerCompatibility from '@/components/MakerCompatibility';
 
 import { useMemo, useState } from 'react';
 import { AUDIENCES, QUESTIONS } from '@/lib/questions';
@@ -256,6 +257,7 @@ export default function HomePage() {
 
   return (
     <>
+      <MakerCompatibility id={result.id} token={result.ownerToken}/>
       <h1>Your quiz is ready</h1>
       <p>Let people prove it — post the link and tag the ones who think they know you.</p>
       <input readOnly value={link} onFocus={(e) => e.target.select()} aria-label="Your quiz link" />
