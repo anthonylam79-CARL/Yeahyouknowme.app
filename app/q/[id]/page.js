@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
+import SelfProfileForm from '@/components/SelfProfileForm';
+import CompatibilityReport from '@/components/CompatibilityReport';
 import ShareRow from '@/components/ShareRow';
 import ScaleInput from '@/components/ScaleInput';
 import { Stage, Receipt } from '@/components/Reveal';
@@ -22,6 +24,9 @@ export default function PlayPage() {
   const [phase, setPhase] = useState('loading'); // loading | notfound | intro | quiz | checking | error | result
   const [quiz, setQuiz] = useState(null);
   const [me, setMe] = useState('');
+  const [email,setEmail]=useState('');
+  const [compare,setCompare]=useState(false);
+  const [selfProfile,setSelfProfile]=useState(null);
   const [i, setI] = useState(0);
   const [guesses, setGuesses] = useState([]);
   const [picked, setPicked] = useState(null); // the tile shown as locked in
@@ -75,7 +80,7 @@ export default function PlayPage() {
       setI(i + 1);
       setPicked(next[i + 1] ?? null);
     } else {
-      submit(next);
+      if (compare && quiz.compatibilityAvailable) setPhase('profile'); else submit(next);
     }
   }
 
@@ -85,14 +90,14 @@ export default function PlayPage() {
     setPicked(guesses[i - 1] ?? null);
   }
 
-  async function submit(finalGuesses) {
+  async function submit(finalGuesses, profile = selfProfile) {
     setPhase('checking');
     setSubmitError('');
     try {
       const res = await fetch(`/api/quizzes/${id}/attempts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ guesserName: me, guesses: finalGuesses, ageBracket: null, gender: null }),
+        body: JSON.stringify({ guesserName: me, guesses: finalGuesses, ageBracket: null, gender: null, email, emailResults:Boolean(email.trim()), profile, shareProfile:profile!==null }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Something went wrong');
@@ -182,7 +187,10 @@ export default function PlayPage() {
           onChange={(e) => setMe(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && me.trim() && setPhase('quiz')}
         />
-        <button className="btn" onClick={() => me.trim() && setPhase('quiz')}>
+        <label>Email my results (optional)<input type="email" placeholder="Your email for results" maxLength={200} value={email} onChange={e=>setEmail(e.target.value)}/></label>
+        <p className="note">Entering your email requests one result receipt. No marketing subscription.</p>
+        {quiz.compatibilityAvailable && <label><input type="checkbox" checked={compare} onChange={e=>setCompare(e.target.checked)}/> Compare our personalities after the quiz (20 optional statements)</label>}
+        <button className="btn" onClick={() => me.trim() && (!email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) && setPhase('quiz')}>
           Start
         </button>
       </>
@@ -228,6 +236,8 @@ export default function PlayPage() {
     );
   }
 
+  if (phase === 'profile') return <SelfProfileForm sharingWith={quiz.makerName} onSkip={()=>submit(guesses,null)} onComplete={p=>{setSelfProfile(p);submit(guesses,p);}}/>;
+
   if (phase === 'checking') {
     return <h1>Checking your answers…</h1>;
   }
@@ -259,6 +269,8 @@ export default function PlayPage() {
         outOf={attemptResult.outOf}
       />
 
+      <CompatibilityReport report={attemptResult.compatibility} makerName={quiz.makerName}/>
+      {attemptResult.emailRequested && <p className="note">Your result email has been requested. Your results are shown here even if email delivery is delayed or unavailable.</p>}
       <button className="btn" onClick={shareCard} disabled={cardBusy}>
         {cardBusy ? 'Making your card…' : 'Share my result card'}
       </button>
