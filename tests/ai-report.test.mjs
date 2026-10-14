@@ -6,7 +6,7 @@ const quiz = { id:'demo', audience:'BFF', question_ids:[0,1], answers:[0,1], own
 const attempts = [{ guesses:[0,2],guesser_name:'SECRET NAME',gender:'SECRET GENDER' },{ guesses:[1,2] }];
 test('evidence contains counts, no personal fields, and changes with new answers', () => {
  const evidence=reportEvidence(quiz,attempts);
- assert.equal(evidence.responses,2);assert.equal(evidence.questions[1].guesses[0].count,2);
+ assert.equal(evidence.responses,2);assert.equal(evidence.questions[0].correctCount,1);assert.equal(evidence.questions[1].othersGuessed[0].count,2);
  assert.ok(!JSON.stringify(evidence).includes('SECRET'));
  assert.equal(evidenceFingerprint(evidence),evidenceFingerprint(reportEvidence(quiz,attempts)));
  assert.notEqual(evidenceFingerprint(evidence),evidenceFingerprint(reportEvidence(quiz,[...attempts,{guesses:[0,0]}])));
