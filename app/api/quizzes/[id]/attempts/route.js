@@ -2,6 +2,8 @@ import { NextResponse, after } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { validateAttempt } from '@/lib/validate';
 import { QUESTIONS } from '@/lib/questions';
+import { compareProfiles, validProfile } from '@/lib/compatibility';
+import { emailTakerResult } from '@/lib/takerEmail';
 import { notifyMakerOfAttempt } from '@/lib/notifyMaker';
 
 // A "hit" (used for the maker's per-question percent-correct insight) is an
@@ -47,7 +49,7 @@ export async function POST(request, { params }) {
 
   const { data: quiz, error: quizError } = await db
     .from('quizzes')
-    .select('id, question_ids, answers')
+    .select('id, maker_name, question_ids, answers, self_profile')
     .eq('id', id)
     .maybeSingle();
 
@@ -59,6 +61,12 @@ export async function POST(request, { params }) {
     return NextResponse.json({ error: 'Quiz not found' }, { status: 404 });
   }
 
+  if (!body || typeof body !== 'object') return NextResponse.json({error:'Invalid body'},{status:400});
+  const email = typeof body.email === 'string' ? body.email.trim() : '';
+  if (email && (email.length > 200 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) return NextResponse.json({error:'Enter a valid email address'},{status:400});
+  if (email && body.emailResults !== true) return NextResponse.json({error:'Please agree to receive your result email'},{status:400});
+  if (body.profile != null && (!validProfile(body.profile) || body.shareProfile !== true)) return NextResponse.json({error:'Complete your snapshot and agree to share the comparison'},{status:400});
+  const compatibility = compareProfiles(quiz.self_profile, body.profile);
   const { errors, value } = validateAttempt(body, quiz.question_ids);
   if (errors.length) {
     return NextResponse.json({ error: errors.join('; ') }, { status: 400 });
@@ -82,6 +90,8 @@ export async function POST(request, { params }) {
       hits,
       age_bracket: value.ageBracket,
       gender: value.gender,
+      compatibility,
+      taker_email_status: email ? 'pending' : null,
     })
     .select('id, created_at')
     .single();
@@ -117,8 +127,12 @@ export async function POST(request, { params }) {
 
   after(() => notifyMakerOfAttempt({ quizId: id, attemptId: inserted.id, guesserName: value.guesserName, score, total: scoreableTotal, origin: 'https://www.yeahyouknowme.app' }));
 
+  if (email) after(() => emailTakerResult({attemptId:inserted.id,email,name:value.guesserName,makerName:quiz.maker_name,score,total:scoreableTotal,compatibility}));
+
   return NextResponse.json(
     {
+      compatibility,
+      emailRequested: Boolean(email),
       score,
       total: scoreableTotal,
       hits,
