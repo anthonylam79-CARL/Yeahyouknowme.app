@@ -23,6 +23,7 @@ export default function HomePage() {
   const [length, setLength] = useState('Standard');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [notifyOnAttempt, setNotifyOnAttempt] = useState(true);
   const [questionIds, setQuestionIds] = useState([]);
   const [answers, setAnswers] = useState([]);
   const [i, setI] = useState(0);
@@ -80,6 +81,7 @@ export default function HomePage() {
           questionIds,
           answers: finalAnswers,
           email: email.trim() || null,
+          notifyOnAttempt,
         }),
       });
       const data = await res.json();
@@ -151,6 +153,10 @@ export default function HomePage() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
+        {email.trim() && <label className="note" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <input type="checkbox" style={{ width: 'auto', margin: 0 }} checked={notifyOnAttempt} onChange={e => setNotifyOnAttempt(e.target.checked)} />
+          Email me when someone completes my quiz. Updates are grouped during busy periods.
+        </label>}
         <button className="btn" onClick={start}>
           Make my quiz
         </button>
