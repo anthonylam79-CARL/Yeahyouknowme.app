@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import ShareRow from '@/components/ShareRow';
 import PsychReport from '@/components/PsychReport';
+import MakerCompatibility from '@/components/MakerCompatibility';
+import CompatibilityReport from '@/components/CompatibilityReport';
 import AIReport from '@/components/AIReport';
 import { formatScore } from '@/lib/format';
 import { verdictFor } from '@/lib/verdict';
@@ -75,6 +77,8 @@ export default function ResultsPage() {
   return (
     <>
       <h1>Who knows {makerName} best</h1>
+      <MakerCompatibility id={id} token={token} available={data.compatibilityAvailable}/>
+      {attempts.filter(a=>a.compatibility).map((a,k)=><section key={k}><h3>{a.name} and {makerName}</h3><CompatibilityReport report={a.compatibility} makerName={makerName}/></section>)}
 
       {justUnlocked && <p className="note">🎉 Unlocked! Your full insights are below.</p>}
 
