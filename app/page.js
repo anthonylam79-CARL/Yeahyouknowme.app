@@ -156,10 +156,10 @@ export default function HomePage() {
         </button>
 
         <div className="sep" />
-        <h2>More than a score</h2>
+        <h2>What do they see that you don’t?</h2>
         <p>
-          A few questions in every quiz come from personality psychology. When people take it, you
-          get a report on how you come across, not just who got the most right.
+          What do people get wrong about you? Do they see you the way you see yourself?
+          Make your quiz, let them guess, then explore the answers in your private full report.
         </p>
         <div className="feature">
           <strong>Your blind spots</strong>
@@ -194,8 +194,9 @@ export default function HomePage() {
           </p>
         </div>
         <p className="note">
-          The score and ranking are free. The full report unlocks for $1.99 per quiz. It's a
-          conversation starter built from a handful of questions, not a personality test.
+          Create and share your quiz free. Scores and rankings are free too. The full report
+          unlocks for US$1.99 per quiz plus applicable tax, with no subscription. Personality
+          comparisons need 3 responses. It’s a conversation starter, not a personality test.
         </p>
       </>
     );
