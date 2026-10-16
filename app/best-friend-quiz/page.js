@@ -1,0 +1,11 @@
+export const metadata = { title: 'Best Friend Quiz: Who Knows You Best?', description: 'Challenge your best friend with a quiz about you.', alternates: { canonical: 'https://www.yeahyouknowme.app/best-friend-quiz' } };
+export default function Page() { return <article>
+<p><a href="/">Yeah You Know Me</a></p><h1>Best Friend Quiz: Who Knows You Best?</h1><p>Challenge your best friend with a quiz about you.</p><p>A shared history doesn’t mean you agree on every answer. Choose BFF, answer about yourself, then send your friend the link. They guess what you picked and see their score.</p>
+<a className="btn" href="/?from=best-friend-quiz">Make my free quiz</a>
+<h2>Five questions to get you thinking</h2><ol><li>What would I pick for a perfect day off?</li><li>Would I rather have a big party or a small get-together?</li><li>When I’m stressed, do I want advice or someone to listen?</li><li>Which matters more to me: a thoughtful surprise or a planned outing?</li><li>What is one habit you think I would change?</li></ol><p className="note">These are conversation ideas. The quiz maker selects from its built-in question bank; individual prompts may differ.</p>
+<h2>How the challenge works</h2><ol><li>Choose who your quiz is for and answer about yourself.</li><li>Copy your quiz link and send it to the people you want to challenge.</li><li>They guess your answers and see their score. You can compare the rankings.</li></ol>
+<h2>Is it free?</h2><p>Creating, sharing, quiz scores and rankings are free. An optional paid private report adds detail for the quiz maker.</p>
+<h2>What does the score mean?</h2><p>It shows how closely someone guessed your answers. It is a conversation starter, not a scientific measure of friendship or relationship success. <a href="/compatibility">Learn about optional personality comparisons.</a></p>
+<h2>Make it a fair challenge</h2><p>Let people answer independently before comparing results. A missed answer can reveal something worth talking about; it does not prove that someone cares less.</p>
+<a className="btn" href="/?from=best-friend-quiz">Create my challenge</a><h2>More quiz ideas</h2><ul><li><a href="/couples-quiz">Couples Quiz</a></li><li><a href="/how-well-do-you-know-me-questions">How Well Do You Know Me? Questions and Free Quiz Maker</a></li></ul>
+</article>; }
