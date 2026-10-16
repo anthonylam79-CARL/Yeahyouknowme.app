@@ -1,8 +1,9 @@
 import './globals.css';
+import GrowthVisit from '@/components/GrowthVisit';
 
 export const metadata = {
-  metadataBase: new URL(process.env.SITE_URL || 'https://yeahyouknowme.app'),
-  title: 'Yeah You Know Me',
+  metadataBase: new URL(process.env.SITE_URL || 'https://www.yeahyouknowme.app'),
+  title: 'How Well Do You Know Me? Free Quiz Maker | Yeah You Know Me',
   description: 'How well do they really know you? Make a quiz, send the link, find out.',
   openGraph: {
     title: 'Yeah You Know Me',
@@ -31,6 +32,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
+        <GrowthVisit />
         <div className="wrap">{children}</div>
       </body>
     </html>

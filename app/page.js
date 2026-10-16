@@ -1,4 +1,5 @@
 'use client';
+import { trackGrowth } from '@/lib/growth';
 import MakerCompatibility from '@/components/MakerCompatibility';
 
 import { useMemo, useState } from 'react';
@@ -37,6 +38,7 @@ export default function HomePage() {
     navigator.clipboard.writeText(url).then(
       () => {
         setCopied(true);
+        trackGrowth('link_copied');
         setTimeout(() => setCopied(false), 1800);
       },
       () => {} // the link is in the box above, selectable by hand
@@ -50,6 +52,7 @@ export default function HomePage() {
     setAnswers([]);
     setI(0);
     setStep('answer');
+    trackGrowth('maker_started');
   }
 
   function swap() {
@@ -88,6 +91,7 @@ export default function HomePage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Something went wrong');
       setResult(data);
+      trackGrowth('quiz_created');
       try {
         localStorage.setItem(`yyk_owner_${data.id}`, data.ownerToken);
       } catch {}
@@ -102,6 +106,7 @@ export default function HomePage() {
     return (
       <>
         <h1>How well do they really know you?</h1>
+        <nav aria-label="Quiz ideas" className="chips"><a href="/best-friend-quiz">Best friend quiz</a> · <a href="/couples-quiz">Couples quiz</a> · <a href="/how-well-do-you-know-me-questions">Question ideas</a></nav>
         <p>
           Answer about yourself. Send the link. They guess. Everyone sees the score, and you see how
           you rate yourself against how people actually see you.

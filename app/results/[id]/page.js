@@ -1,4 +1,5 @@
 'use client';
+import { trackGrowth } from '@/lib/growth';
 
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
@@ -47,6 +48,7 @@ export default function ResultsPage() {
       });
       const body = await res.json();
       if (!res.ok || !body.url) throw new Error(body.error || 'Could not start checkout');
+      trackGrowth('checkout_started');
       window.location.href = body.url;
     } catch (err) {
       setUnlockError(err.message || 'Something went wrong. Try again.');

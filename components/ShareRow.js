@@ -1,4 +1,5 @@
 'use client';
+import { trackGrowth } from '@/lib/growth';
 
 function copy(text, onDone) {
   navigator.clipboard.writeText(text).then(
@@ -29,7 +30,8 @@ export default function ShareRow({ text, link }) {
     ['Email', `mailto:?subject=${e(text)}&body=${e(full)}`],
   ];
 
-  const go = (url, copyText) => () => {
+  const go = (url, copyText, name) => () => {
+    trackGrowth('share_opened', name);
     if (copyText) {
       navigator.clipboard.writeText(copyText).catch(() => {});
     }
@@ -43,6 +45,7 @@ export default function ShareRow({ text, link }) {
   const nativeShare = async () => {
     try {
       await navigator.share({ text, url: link });
+      trackGrowth('share_completed', 'native');
     } catch {
       /* cancelled, ignore */
     }
@@ -79,7 +82,7 @@ export default function ShareRow({ text, link }) {
         TikTok
       </button>
       {targets.map(([name, url, copyText]) => (
-        <button key={name} className="btn alt small" onClick={go(url, copyText)}>
+        <button key={name} className="btn alt small" onClick={go(url, copyText, name)}>
           {name}
         </button>
       ))}
