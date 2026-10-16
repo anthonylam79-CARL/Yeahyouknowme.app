@@ -5,6 +5,6 @@ export default function robots() {
       allow: '/',
       disallow: ['/api/', '/results/'], // private/token-gated, nothing to index
     },
-    sitemap: 'https://yeahyouknowme.app/sitemap.xml',
+    sitemap: 'https://www.yeahyouknowme.app/sitemap.xml',
   };
 }
