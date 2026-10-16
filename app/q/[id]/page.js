@@ -1,4 +1,5 @@
 'use client';
+import { trackGrowth } from '@/lib/growth';
 
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
@@ -102,6 +103,7 @@ export default function PlayPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Something went wrong');
       setAttemptResult(data);
+      trackGrowth('quiz_completed');
       setPhase('result');
     } catch (err) {
       setSubmitError(err.message || 'Something went wrong');
@@ -142,13 +144,15 @@ export default function PlayPage() {
       const blob = await res.blob();
       const file = new File([blob], 'yeah-you-know-me.png', { type: 'image/png' });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], text: `${post} ${window.location.href}` });
+        await navigator.share({ files: [file], text: `${post} ${window.location.origin}/q/${id}` });
+        trackGrowth('card_shared');
       } else {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = 'yeah-you-know-me.png';
         a.click();
+        trackGrowth('card_downloaded');
         setTimeout(() => URL.revokeObjectURL(url), 1000);
       }
     } catch (err) {
@@ -255,7 +259,7 @@ export default function PlayPage() {
   }
 
   // result
-  const link = typeof window !== 'undefined' ? window.location.href : '';
+  const link = typeof window !== 'undefined' ? `${window.location.origin}/q/${id}` : '';
 
   return (
     <>
@@ -269,6 +273,11 @@ export default function PlayPage() {
         outOf={attemptResult.outOf}
       />
 
+      <section className="paywall">
+        <h2>Now it’s your turn</h2>
+        <p>You guessed their answers. Who can guess yours? Make a free quiz and challenge your friends.</p>
+        <a className="btn" href="/?from=result" onClick={() => trackGrowth('maker_cta', 'result')}>Think you know me? Make yours</a>
+      </section>
       <CompatibilityReport report={attemptResult.compatibility} makerName={quiz.makerName}/>
       {attemptResult.emailRequested && <p className="note">Your result email has been requested. Your results are shown here even if email delivery is delayed or unavailable.</p>}
       <button className="btn" onClick={shareCard} disabled={cardBusy}>
