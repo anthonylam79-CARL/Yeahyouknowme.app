@@ -4,10 +4,10 @@
 // is an illustration, not a real result. Prompts are real questions from
 // the bank so it reads like the product.
 const ROWS = [
-  [true, 'Your alarm goes off. You...'],
-  [true, 'Your coffee order, specifically'],
-  [false, 'Pineapple on pizza, final answer'],
-  [true, 'Biggest fear, honestly'],
+  [true, 'You get a warning label. What does it say?'],
+  [true, 'Your group chat becomes a courtroom.'],
+  [false, 'A ghost moves into your room.'],
+  [true, 'Your life gets a loading-screen tip.'],
 ];
 
 export default function Hero() {
